@@ -1,0 +1,42 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+
+      <!-- Import Map за Three.js и неговите добавки -->
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "./three.js-master/build/three.module.js",
+            "three/addons/": "./three.js-master/examples/jsm/",
+            "OrbitControls": "./three.js-master/examples/jsm/controls/OrbitControls.js"
+          }
+        }
+      </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Симулация на Махало</h1>
+    </div>
+
+    <div class="controls">
+        <label for="mass-slider">Маса на топчето:</label>
+        <input type="range" id="mass-slider" min="1" max="10" step="0.1">
+
+        <label for="length-slider">Дължина на нишката:</label>
+        <input type="range" id="length-slider" min="1" max="10" step="0.1">
+
+        <div class="buttons">
+            <button id="start-btn">Старт</button>
+            <button id="stop-btn">Стоп</button>
+            <button id="restart-btn">Рестарт</button>
+        </div>
+    </div>
+
+    <canvas class="webgl"></canvas>
+    <script type="module" src="index.js"></script>
+</body>
+
+</html>

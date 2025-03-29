@@ -1,0 +1,84 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+/* Центриране на заглавието */
+.header {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+/* Стилове за контролите */
+.controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Стилове за слайдерите */
+label {
+    display: block;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Стилове за бутоните */
+.buttons {
+    margin-top: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+#start-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#stop-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+#restart-btn {
+    background-color: #008CBA;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+

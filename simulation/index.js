@@ -17,16 +17,81 @@ scene.background = backgroundTexture;
 const loader = new GLTFLoader();
 let root = null;
 
+let sphere = null;
+let cylinder = null;
+
 loader.load('assets/pendulum.glb', function(glb) {
     console.log(glb);
     root = glb.scene;
     root.scale.set(0.45, 0.45, 0.45);
     root.position.y = -0.7;
     scene.add(root);
+
+    sphere = root.getObjectByName("Sphere");
+    cylinder = root.getObjectByName("Cylinder004");
+
+
 }, function(xhr) {
     console.log((xhr.loaded / xhr.total * 100) + "% loaded");
 }, function(error) {
     console.log("An error occurred");
+});
+
+function updateSphereSize(value) {
+    if (sphere) {
+        let scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99); // По-малка разлика в размера
+        sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    }
+}
+
+// Свързваме слайдера и инпута с функцията
+const massSlider = document.getElementById("mass-slider");
+const massInput = document.getElementById("mass-input");
+
+massSlider.addEventListener("input", (event) => {
+    let value = parseFloat(event.target.value);
+    massInput.value = value;
+    updateSphereSize(value);
+});
+
+massInput.addEventListener("input", (event) => {
+    let value = parseFloat(event.target.value);
+    massSlider.value = value;
+    updateSphereSize(value);
+});
+
+function updateStringLength(length) {
+    if (!cylinder || !sphere) {
+        console.error("Липсва нишка или топче!");
+        return;
+    }
+
+    // 1. Запазваме оригиналната позиция на горния край на нишката
+    const topPosition = cylinder.position.clone();
+
+    // 2. Променяме само скалата по ос Y на цилиндъра (нишката)
+    // Това ще увеличи дължината на нишката, но без да променяме позицията на горния край
+    cylinder.scale.y = length;
+
+    // 3. Променяме позицията на топчето така, че да се мести надолу
+    // Новата позиция на топчето трябва да е разстояние length от горния край на нишката
+    sphere.position.set(topPosition.x, topPosition.y - length, topPosition.z);
+}
+
+// Свързваме слайдера и инпута с функцията
+const lengthSlider = document.getElementById("length-slider");
+const lengthInput = document.getElementById("length-input");
+
+lengthSlider.addEventListener("input", (event) => {
+    let value = parseFloat(event.target.value);
+    lengthInput.value = value;
+    updateStringLength(value);
+});
+
+lengthInput.addEventListener("input", (event) => {
+    let value = parseFloat(event.target.value);
+    lengthSlider.value = value;
+    updateStringLength(value);
 });
 
 // Добавяне на осветление

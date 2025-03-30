@@ -1,11 +1,10 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Симулация на Махало</title>
     <link rel="stylesheet" href="styles.css">
-
-      <!-- Import Map за Three.js и неговите добавки -->
     <script type="importmap">
         {
           "imports": {
@@ -14,29 +13,95 @@
             "OrbitControls": "./three.js-master/examples/jsm/controls/OrbitControls.js"
           }
         }
-      </script>
+    </script>
 </head>
 <body>
     <div class="header">
-        <h1>Симулация на Махало</h1>
+        <h1>Симулация на Математично Махало</h1>
     </div>
 
-    <div class="controls">
-        <label for="mass-slider">Маса на топчето:</label>
-        <input type="range" id="mass-slider" min="1" max="10" step="0.1">
-
-        <label for="length-slider">Дължина на нишката:</label>
-        <input type="range" id="length-slider" min="1" max="10" step="0.1">
-
-        <div class="buttons">
-            <button id="start-btn">Старт</button>
-            <button id="stop-btn">Стоп</button>
-            <button id="restart-btn">Рестарт</button>
+    <!-- Основен контейнер за симулацията -->
+    <div class="simulation-container">
+        <!-- Canvas за Three.js визуализация -->
+        <canvas class="webgl"></canvas>
+        
+        <!-- Панел с контроли -->
+        <div class="right-panel">
+            <div class="controls-panel">
+                <div class="controls-content">
+                    <div class="controls-section">
+                        <h2>Параметри на махалото</h2>
+                        <div class="control-group">
+                            <label for="mass-slider">Маса на топчето (kg):</label>
+                            <div class="slider-container">
+                                <input type="range" id="mass-slider" min="0.1" max="10" step="0.1" value="1">
+                                <input type="number" id="mass-input" min="0.1" max="10" step="0.1" value="1" class="value-input">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="length-slider">Дължина на нишката (m):</label>
+                            <div class="slider-container">
+                                <input type="range" id="length-slider" min="0.5" max="5" step="0.1" value="1">
+                                <input type="number" id="length-input" min="0.5" max="5" step="0.1" value="1" class="value-input">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="angle-slider">Ъгъл на отклонение (°):</label>
+                            <div class="slider-container">
+                                <input type="range" id="angle-slider" min="5" max="45" step="1" value="15">
+                                <input type="number" id="angle-input" min="5" max="45" step="1" value="15" class="value-input">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="gravity-select">Гравитация:</label>
+                            <select id="gravity-select">
+                                <option value="9.81">Земя (9.81 m/s²)</option>
+                                <option value="1.62">Луна (1.62 m/s²)</option>
+                                <option value="3.71">Марс (3.71 m/s²)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-section">
+                        <h2>Управление</h2>
+                        <div class="buttons-container">
+                            <div class="buttons-row">
+                                <button id="start-btn">Старт</button>
+                                <button id="pause-btn">Пауза</button>
+                                <button id="reset-btn">Нулиране</button>
+                            </div>
+                            <button id="save-btn">Запис на данни</button>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-section energy-section">
+                        <h2>Енергии</h2>
+                        <div class="energy-display">
+                            <div class="energy-value">
+                                <label>Потенциална енергия:</label>
+                                <span id="potential-energy">0.00</span> J
+                            </div>
+                            <div class="energy-value">
+                                <label>Кинетична енергия:</label>
+                                <span id="kinetic-energy">0.00</span> J
+                            </div>
+                            <div class="energy-value total">
+                                <label>Обща енергия:</label>
+                                <span id="total-energy">0.00</span> J
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--TO DO-->
+            <!-- Контейнер за графиката -->
+            <div class="graph-container">
+                <h2>Графика на трептенията</h2>
+                <canvas id="graph-canvas"></canvas>
+            </div>
         </div>
     </div>
 
-    <canvas class="webgl"></canvas>
     <script type="module" src="index.js"></script>
 </body>
-
 </html>

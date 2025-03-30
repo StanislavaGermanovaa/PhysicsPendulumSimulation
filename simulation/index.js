@@ -7,7 +7,11 @@ const canvas = document.querySelector('.webgl');
 
 // Създаваме сцена
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x888888); // По-светло сив фон
+
+const textureLoader = new THREE.TextureLoader();
+const backgroundTexture = textureLoader.load('assets/background.jpg');
+
+scene.background = backgroundTexture;
 
 // Зареждане на GLB модел за махалото
 const loader = new GLTFLoader();
@@ -16,7 +20,8 @@ let root = null;
 loader.load('assets/pendulum.glb', function(glb) {
     console.log(glb);
     root = glb.scene;
-    root.scale.set(0.35, 0.35, 0.35);
+    root.scale.set(0.45, 0.45, 0.45);
+    root.position.y = -0.7;
     scene.add(root);
 }, function(xhr) {
     console.log((xhr.loaded / xhr.total * 100) + "% loaded");
@@ -46,7 +51,7 @@ const sizes = {
 
 // Създаваме перспектива на камерата
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(0, 1, 4);
+camera.position.set(0, 1.5, 3.5);
 scene.add(camera);
 
 // Създаване на WebGL рендерер

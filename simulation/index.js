@@ -39,7 +39,7 @@ loader.load('assets/pendulum.glb', function(glb) {
 
 function updateSphereSize(value) {
     if (sphere) {
-        let scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99); // По-малка разлика в размера
+        let scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99);
         sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
     }
 }
@@ -60,23 +60,27 @@ massInput.addEventListener("input", (event) => {
     updateSphereSize(value);
 });
 
+
+
 function updateStringLength(length) {
-    if (!cylinder || !sphere) {
-        console.error("Липсва нишка или топче!");
-        return;
+    if (cylinder && sphere) {
+        const originalHeight = 2; // Оригиналната височина на цилиндъра (ако е 2)
+        
+        // Променяме височината на нишката чрез мащабиране
+        cylinder.scale.y = length;
+        
+        // Коригиране на позицията на цилиндъра спрямо дължината
+        cylinder.position.y = 4.769101142883301 - (length - 1) * (originalHeight / 2);
+
+        // ❗ Залепяне на топчето в края на нишката
+        const cylinderEndY = cylinder.position.y - (length * originalHeight) / 2;
+        sphere.position.y = cylinderEndY - sphere.scale.y * 0.5; 
+
+        console.log("Updated Cylinder Position:", cylinder.position.y);
+        console.log("Updated Sphere Position:", sphere.position.y);
     }
-
-    // 1. Запазваме оригиналната позиция на горния край на нишката
-    const topPosition = cylinder.position.clone();
-
-    // 2. Променяме само скалата по ос Y на цилиндъра (нишката)
-    // Това ще увеличи дължината на нишката, но без да променяме позицията на горния край
-    cylinder.scale.y = length;
-
-    // 3. Променяме позицията на топчето така, че да се мести надолу
-    // Новата позиция на топчето трябва да е разстояние length от горния край на нишката
-    sphere.position.set(topPosition.x, topPosition.y - length, topPosition.z);
 }
+
 
 // Свързваме слайдера и инпута с функцията
 const lengthSlider = document.getElementById("length-slider");

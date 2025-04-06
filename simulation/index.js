@@ -124,26 +124,8 @@ angleInput.addEventListener("input", (event) => {
 function updatePendulumPosition() {
     if (sphere && cylinder) {
         empty.rotation.x = angleRad; 
-
-        // const pendulumLength = Math.abs(cylinder.scale.y); // Дължината на нишката
-        // const pivotPoint = cylinder.position;
-
-        // // Въртене на цилиндъра около неговия пивот
-        // cylinder.rotation.x = angleRad; 
-        // sphere.rotation.x = angleRad;
-        
-        // // Позиционираме топчето спрямо въртенето на цилиндъра
-        // sphere.position.z = pivotPoint.z - Math.sin(angleRad) * pendulumLength;
-        // sphere.position.y = pivotPoint.y - pendulumLength * Math.cos(angleRad); // Премахваме 4.7, за да е коректно спрямо ъгъла
-
-        // // Ако е необходимо да добавим изместване (например ако искаме да го преместим малко нагоре):
-        // sphere.position.y += 4.5;
-
     }
 }
-
-
-
 
 
 // Добавяне на осветление
@@ -188,12 +170,63 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = false;
 
+
+let isAnimating = false;
+let time = 0;
+const g = 9.81;
+let pauseTime = 0; // добавяме това
+let startTime = null; // моментът на стартиране
+
+const startBtn = document.getElementById("start-btn");
+
+startBtn.addEventListener("click", () => {
+    if (!isAnimating) {
+        isAnimating = true;
+        startTime = performance.now() / 1000 - pauseTime; // продължи от времето, когато беше паузирано
+    }
+});
+
+const pauseBtn = document.getElementById("pause-btn");
+const resetBtn = document.getElementById("reset-btn");
+
+pauseBtn.addEventListener("click", () => {
+    if (isAnimating) {
+        isAnimating = false;
+        pauseTime = performance.now() / 1000 - startTime; // запази времето, докъдето стигнахме
+    }
+});
+
+resetBtn.addEventListener("click", () => {
+    isAnimating = false;
+    time = 0;
+    pauseTime = 0;
+    angleRad = angle * Math.PI / 180;
+    if (empty) {
+        empty.rotation.x = angleRad;
+    }
+});
+
 // Функция за анимация
 function animate() {
     requestAnimationFrame(animate);
 
     if (root) {
         root.rotation.y += 0.005;
+
+        if (isAnimating && empty) {
+            let length = parseFloat(lengthInput.value);   // m
+            let angleDeg = parseFloat(angleInput.value);  // градуси
+            let angle0 = angleDeg * Math.PI / 180;        // началният ъгъл в радиани
+
+            let omega = Math.sqrt(g / length);            // ъглова честота
+
+            let currentTime = performance.now() / 1000;   // секунди
+            time = currentTime - startTime;               // време от началото или продължението
+
+            let currentAngle = angle0 * Math.cos(omega * time);
+
+            empty.rotation.x = currentAngle;
+        }
     }
 
     controls.update();

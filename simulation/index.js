@@ -20,6 +20,7 @@ let root = null;
 let sphere = null;
 let cylinder = null;
 
+
 loader.load('assets/pendulum.glb', function(glb) {
     console.log(glb);
     root = glb.scene;
@@ -29,6 +30,7 @@ loader.load('assets/pendulum.glb', function(glb) {
 
     sphere = root.getObjectByName("Sphere");
     cylinder = root.getObjectByName("Cylinder004");
+
 
 
 }, function(xhr) {
@@ -41,10 +43,12 @@ function updateSphereSize(value) {
     if (sphere) {
         let scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99);
         sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
     }
+    console.log(cylinder.position);
+console.log("Y: " + cylinder.position.y);
 }
 
-// Свързваме слайдера и инпута с функцията
 const massSlider = document.getElementById("mass-slider");
 const massInput = document.getElementById("mass-input");
 
@@ -64,25 +68,16 @@ massInput.addEventListener("input", (event) => {
 
 function updateStringLength(length) {
     if (cylinder && sphere) {
-        const originalHeight = 2; // Оригиналната височина на цилиндъра (ако е 2)
+        const topPosition = cylinder.scale.clone();
         
-        // Променяме височината на нишката чрез мащабиране
-        cylinder.scale.y = length;
-        
-        // Коригиране на позицията на цилиндъра спрямо дължината
-        cylinder.position.y = 4.769101142883301 - (length - 1) * (originalHeight / 2);
+        // Мащабираме височината на нишката
+        cylinder.scale.y = length * -1;
 
-        // ❗ Залепяне на топчето в края на нишката
-        const cylinderEndY = cylinder.position.y - (length * originalHeight) / 2;
-        sphere.position.y = cylinderEndY - sphere.scale.y * 0.5; 
-
-        console.log("Updated Cylinder Position:", cylinder.position.y);
-        console.log("Updated Sphere Position:", sphere.position.y);
+        const cylinderEndY = (topPosition.y+5.7) + cylinder.scale.y;
+        sphere.position.y = cylinderEndY - sphere.scale.y / 2;
     }
 }
 
-
-// Свързваме слайдера и инпута с функцията
 const lengthSlider = document.getElementById("length-slider");
 const lengthInput = document.getElementById("length-input");
 
@@ -97,6 +92,44 @@ lengthInput.addEventListener("input", (event) => {
     lengthSlider.value = value;
     updateStringLength(value);
 });
+
+
+//ъгъл
+
+let angle = 0; 
+let angleRad = angle * (Math.PI / 180);  
+
+const angleSlider = document.getElementById("angle-slider");
+const angleInput = document.getElementById("angle-input");
+
+angleSlider.addEventListener("input", (event) => {
+    let value = parseInt(event.target.value);  
+    angleInput.value = value; 
+    angle = value; 
+    angleRad = angle * (Math.PI / 180); 
+    updatePendulumPosition(); 
+});
+
+angleInput.addEventListener("input", (event) => {
+    let value = parseInt(event.target.value);  
+    angleSlider.value = value; 
+    angle = value; 
+    angleRad = angle * (Math.PI / 180);  
+    updatePendulumPosition(); 
+});
+
+
+
+function updatePendulumPosition() {
+    if (sphere && cylinder) {
+        // Въртене на цилиндъра около неговия пивот
+        cylinder.rotation.x = angleRad; 
+    }
+}
+
+
+
+
 
 // Добавяне на осветление
 const light = new THREE.DirectionalLight(0xffffff, 1);

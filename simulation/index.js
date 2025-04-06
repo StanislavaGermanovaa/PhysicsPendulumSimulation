@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'OrbitControls';
 
+
 // Избираме canvas елемента от HTML, в който ще се рендираме сцената
 const canvas = document.querySelector('.webgl');
 
@@ -23,7 +24,6 @@ let empty = null;
 
 
 loader.load('assets/pendulum.glb', function(glb) {
-    console.log(glb);
     root = glb.scene;
     root.scale.set(0.45, 0.45, 0.45);
     root.position.y = -0.7;
@@ -47,8 +47,6 @@ function updateSphereSize(value) {
         sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
     }
-    console.log(cylinder.position);
-console.log("Y: " + cylinder.position.y);
 }
 
 const massSlider = document.getElementById("mass-slider");
@@ -206,6 +204,36 @@ resetBtn.addEventListener("click", () => {
     }
 });
 
+
+
+const chartCtx = document.getElementById("chart").getContext("2d");
+const chartData = {
+    labels: [],
+    datasets: [{
+        label: 'Ъгъл (рад)',
+        data: [],
+        borderColor: 'rgba(75, 192, 192, 1)',
+        fill: false,
+        tension: 0.1
+    }]
+};
+const angleChart = new Chart(chartCtx, {
+    type: 'line',
+    data: chartData,
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                title: { display: true, text: 'Време (s)' }
+            },
+            y: {
+                title: { display: true, text: 'Ъгъл (рад)' }
+            }
+        }
+    }
+});
+
+
 // Функция за анимация
 function animate() {
     requestAnimationFrame(animate);
@@ -226,6 +254,21 @@ function animate() {
             let currentAngle = angle0 * Math.cos(omega * time);
 
             empty.rotation.x = currentAngle;
+
+
+
+        
+            // === ➕ Добави към графиката ===
+            chartData.labels.push(time.toFixed(2));
+            chartData.datasets[0].data.push(currentAngle.toFixed(4));
+        
+            // Ограничаваме до последните 100 точки
+            if (chartData.labels.length > 100) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+            }
+        
+            angleChart.update();
         }
     }
 

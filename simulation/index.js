@@ -19,6 +19,7 @@ let root = null;
 
 let sphere = null;
 let cylinder = null;
+let empty = null;
 
 
 loader.load('assets/pendulum.glb', function(glb) {
@@ -30,6 +31,7 @@ loader.load('assets/pendulum.glb', function(glb) {
 
     sphere = root.getObjectByName("Sphere");
     cylinder = root.getObjectByName("Cylinder004");
+    empty = root.getObjectByName("Pivot_Cylinder");
 
 
 
@@ -72,8 +74,7 @@ function updateStringLength(length) {
         
         // Мащабираме височината на нишката
         cylinder.scale.y = length * -1;
-
-        const cylinderEndY = (topPosition.y+5.7) + cylinder.scale.y;
+        const cylinderEndY = (topPosition.y) + cylinder.scale.y;
         sphere.position.y = cylinderEndY - sphere.scale.y / 2;
     }
 }
@@ -122,8 +123,22 @@ angleInput.addEventListener("input", (event) => {
 
 function updatePendulumPosition() {
     if (sphere && cylinder) {
-        // Въртене на цилиндъра около неговия пивот
-        cylinder.rotation.x = angleRad; 
+        empty.rotation.x = angleRad; 
+
+        // const pendulumLength = Math.abs(cylinder.scale.y); // Дължината на нишката
+        // const pivotPoint = cylinder.position;
+
+        // // Въртене на цилиндъра около неговия пивот
+        // cylinder.rotation.x = angleRad; 
+        // sphere.rotation.x = angleRad;
+        
+        // // Позиционираме топчето спрямо въртенето на цилиндъра
+        // sphere.position.z = pivotPoint.z - Math.sin(angleRad) * pendulumLength;
+        // sphere.position.y = pivotPoint.y - pendulumLength * Math.cos(angleRad); // Премахваме 4.7, за да е коректно спрямо ъгъла
+
+        // // Ако е необходимо да добавим изместване (например ако искаме да го преместим малко нагоре):
+        // sphere.position.y += 4.5;
+
     }
 }
 

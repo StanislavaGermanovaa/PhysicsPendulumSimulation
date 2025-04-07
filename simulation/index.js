@@ -169,6 +169,8 @@ controls.dampingFactor = 0.25;
 controls.enableZoom = false;
 
 
+
+//графика
 let isAnimating = false;
 let time = 0;
 const g = 9.81;
@@ -234,6 +236,55 @@ const angleChart = new Chart(chartCtx, {
 });
 
 
+
+function calculateEnergies() {
+    // Масата на топчето
+    const mass = parseFloat(massInput.value);  // kg
+    console.log("Mass: ", mass);
+
+    // Дължината на нишката
+    const length = parseFloat(lengthInput.value);  // m
+    console.log("Length: ", length);
+
+    // Ъгълът на отклонение (в радиани)
+    const angleDeg = parseFloat(angleInput.value);  // градуси
+    const angle0 = angleDeg * Math.PI / 180;  // началният ъгъл в радиани
+    console.log("Initial Angle (rad): ", angle0);
+
+    const omega = Math.sqrt(g / length);  // ъглова честота
+    console.log("Omega: ", omega);
+
+    // Текущото време от началото на симулацията
+    let currentTime = performance.now() / 1000;
+    let time = currentTime - startTime;  // Време от стартиране или пауза
+    console.log("Time: ", time);
+
+    // Текущият ъгъл на махалото
+    let currentAngle = angle0 * Math.cos(omega * time);
+    console.log("Current Angle: ", currentAngle);
+
+    // Потенциална енергия
+    let height = length * (1 - Math.cos(currentAngle));
+    let potentialEnergy = mass * g * height;  // Joules
+    console.log("Potential Energy: ", potentialEnergy);
+
+    // Кинетична енергия
+    let angularVelocity = omega * Math.sin(omega * time);  // ъглова скорост
+    let linearVelocity = length * angularVelocity;  // линейна скорост
+    let kineticEnergy = 0.5 * mass * linearVelocity * linearVelocity;  // Joules
+    console.log("Kinetic Energy: ", kineticEnergy);
+
+    // Общата енергия
+    let totalEnergy = potentialEnergy + kineticEnergy;  // Joules
+    console.log("Total Energy: ", totalEnergy);
+
+    // Обновяваме енергийни стойности в HTML
+    document.getElementById("potential-energy").textContent = potentialEnergy.toFixed(2);
+    document.getElementById("kinetic-energy").textContent = kineticEnergy.toFixed(2);
+    document.getElementById("total-energy").textContent = totalEnergy.toFixed(2);
+}
+
+
 // Функция за анимация
 function animate() {
     requestAnimationFrame(animate);
@@ -256,7 +307,7 @@ function animate() {
             empty.rotation.x = currentAngle;
 
 
-
+            calculateEnergies();
         
             // === ➕ Добави към графиката ===
             chartData.labels.push(time.toFixed(2));

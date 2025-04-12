@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пружинно Махало</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "./three.js-master/build/three.module.js",
+            "three/addons/": "./three.js-master/examples/jsm/",
+            "OrbitControls": "./three.js-master/examples/jsm/controls/OrbitControls.js"
+          }
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Симулация на Пружинно Махало</h1>
+    </div>
+    <div class="simulation-container">
+        <div class="controls-panel">
+            <div class="controls-content">
+                <div class="controls-section">
+                    <h2>Параметри на пружинното махало</h2>
+
+                    <div class="control-group">
+                        <label for="mass-slider">Маса (kg):</label>
+                        <div class="slider-container">
+                            <input type="range" id="mass-slider" min="0.1" max="5" step="0.1" value="1">
+                            <input type="number" id="mass-input" min="0.1" max="5" step="0.1" value="1" class="value-input">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="k-slider">Пружинна константа k (N/m):</label>
+                        <div class="slider-container">
+                            <input type="range" id="k-slider" min="1" max="100" step="1" value="20">
+                            <input type="number" id="k-input" min="1" max="100" step="1" value="20" class="value-input">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="amplitude-slider">Амплитуда на отклонение (m):</label>
+                        <div class="slider-container">
+                            <input type="range" id="amplitude-slider" min="0" max="2" step="0.01" value="0.5">
+                            <input type="number" id="amplitude-input" min="0" max="2" step="0.01" value="0.5" class="value-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <h2>Управление</h2>
+                    <div class="buttons-container">
+                        <div class="buttons-row">
+                            <button id="start-btn">Старт</button>
+                            <button id="pause-btn">Пауза</button>
+                            <button id="reset-btn">Нулиране</button>
+                        </div>
+                        <button id="math-btn" onclick="location.href='index.html'">Математично махало</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas">
+            <canvas class="webgl"></canvas>
+        </div>
+
+        <div class="graph-container">
+            <div class="graph-content">
+                <h2>Графика на преместване</h2>
+                <canvas id="chart" width="400" height="200"></canvas>
+                <div class="controls-section energy-section">
+                    <h2>Енергии</h2>
+                    <div class="energy-display">
+                        <div class="energy-value">
+                            <label>Потенциална:</label>
+                            <span id="potential-energy">0.00</span> J
+                        </div>
+                        <div class="energy-value">
+                            <label>Кинетична:</label>
+                            <span id="kinetic-energy">0.00</span> J
+                        </div>
+                        <div class="energy-value total">
+                            <label>Обща:</label>
+                            <span id="total-energy">0.00</span> J
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="spring.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
+

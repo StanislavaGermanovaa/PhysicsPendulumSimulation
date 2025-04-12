@@ -200,10 +200,26 @@ resetBtn.addEventListener("click", () => {
     isAnimating = false;
     time = 0;
     pauseTime = 0;
-    angleRad = angle * Math.PI / 180;
+    
+    angle = 0;
+    angleRad = 0;
+
+    angleSlider.value = 0;
+    angleInput.value = 0;
+
     if (empty) {
-        empty.rotation.x = angleRad;
+        empty.rotation.x = 0;
     }
+
+    // Изчистваме графиката
+    chartData.labels = [];
+    chartData.datasets[0].data = [];
+    angleChart.update();
+
+    // Нулираме стойностите на енергията
+    document.getElementById("potential-energy").textContent = "0.00";
+    document.getElementById("kinetic-energy").textContent = "0.00";
+    document.getElementById("total-energy").textContent = "0.00";
 });
 
 
@@ -212,7 +228,7 @@ const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
     labels: [],
     datasets: [{
-        label: 'Ъгъл (рад)',
+        label: 'Графиката на хармонично трептене',
         data: [],
         borderColor: 'rgba(75, 192, 192, 1)',
         fill: false,
@@ -229,7 +245,9 @@ const angleChart = new Chart(chartCtx, {
                 title: { display: true, text: 'Време (s)' }
             },
             y: {
-                title: { display: true, text: 'Ъгъл (рад)' }
+                min: -90,  // ⬅️ от -90 градуса
+                max: 90,   // ⬆️ до +90 градуса
+                title: { display: true, text: 'Ъгъл (°)' }
             }
         }
     }
@@ -247,16 +265,16 @@ function calculateEnergies() {
     console.log("Length: ", length);
 
     // Ъгълът на отклонение (в радиани)
-    const angleDeg = parseFloat(angleInput.value);  // градуси
-    const angle0 = angleDeg * Math.PI / 180;  // началният ъгъл в радиани
+    const angleDeg = parseFloat(angleInput.value);  
+    const angle0 = angleDeg * Math.PI / 180;  
     console.log("Initial Angle (rad): ", angle0);
 
-    const omega = Math.sqrt(g / length);  // ъглова честота
+    const omega = Math.sqrt(g / length); 
     console.log("Omega: ", omega);
 
     // Текущото време от началото на симулацията
     let currentTime = performance.now() / 1000;
-    let time = currentTime - startTime;  // Време от стартиране или пауза
+    let time = currentTime - startTime; 
     console.log("Time: ", time);
 
     // Текущият ъгъл на махалото
@@ -265,17 +283,17 @@ function calculateEnergies() {
 
     // Потенциална енергия
     let height = length * (1 - Math.cos(currentAngle));
-    let potentialEnergy = mass * g * height;  // Joules
+    let potentialEnergy = mass * g * height;  
     console.log("Potential Energy: ", potentialEnergy);
 
     // Кинетична енергия
-    let angularVelocity = omega * Math.sin(omega * time);  // ъглова скорост
-    let linearVelocity = length * angularVelocity;  // линейна скорост
-    let kineticEnergy = 0.5 * mass * linearVelocity * linearVelocity;  // Joules
+    let angularVelocity = omega * Math.sin(omega * time); 
+    let linearVelocity = length * angularVelocity; 
+    let kineticEnergy = 0.5 * mass * linearVelocity * linearVelocity;  
     console.log("Kinetic Energy: ", kineticEnergy);
 
     // Общата енергия
-    let totalEnergy = potentialEnergy + kineticEnergy;  // Joules
+    let totalEnergy = potentialEnergy + kineticEnergy;  
     console.log("Total Energy: ", totalEnergy);
 
     // Обновяваме енергийни стойности в HTML
@@ -308,13 +326,17 @@ function animate() {
 
 
             calculateEnergies();
+
+
+            let currentAngleDeg = currentAngle * (180 / Math.PI);
+
         
             // === ➕ Добави към графиката ===
             chartData.labels.push(time.toFixed(2));
-            chartData.datasets[0].data.push(currentAngle.toFixed(4));
+            chartData.datasets[0].data.push(currentAngleDeg.toFixed(2));
         
             // Ограничаваме до последните 100 точки
-            if (chartData.labels.length > 100) {
+            if (chartData.labels.length > 500) {
                 chartData.labels.shift();
                 chartData.datasets[0].data.shift();
             }

@@ -84,7 +84,20 @@ lengthInput.addEventListener("input", (event) => {
     updateStringLength(value);
 });
 
+const kSlider = document.getElementById("k-slider");
+const kInput = document.getElementById("k-input");
 
+let springConstant = parseFloat(kSlider.value);
+
+kSlider.addEventListener("input", (event) => {
+    springConstant = parseFloat(event.target.value);
+    kInput.value = springConstant;
+});
+
+kInput.addEventListener("input", (event) => {
+    springConstant = parseFloat(event.target.value);
+    kSlider.value = springConstant;
+});
 
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(2, 2, 5);
@@ -127,12 +140,109 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = false;
 
+let isAnimating = false;
+let time = 0;
+let animationId = null;
+
+let prevPositionY = null;
+let prevTime = null;
+
+const potentialEnergyElem = document.getElementById('potential-energy');
+const kineticEnergyElem = document.getElementById('kinetic-energy');
+const totalEnergyElem = document.getElementById('total-energy');
+
+const startBtn = document.getElementById("start-btn");
+const pauseBtn = document.getElementById("pause-btn");
+const resetBtn = document.getElementById("reset-btn");
+
+startBtn.addEventListener("click", () => {
+    if (!isAnimating) {
+        isAnimating = true;
+    }
+});
+
+pauseBtn.addEventListener("click", () => {
+    isAnimating = false;
+    cancelAnimationFrame(animationId);
+});
+
+resetBtn.addEventListener("click", () => {
+    isAnimating = false;
+    time = 0;
+    cancelAnimationFrame(animationId);
+
+    let length = parseFloat(lengthSlider.value);
+    
+    if (spring) spring.scale.z = length;
+    if (sphere) sphere.position.y = -6 * length;
+});
+
+const chartCtx = document.getElementById("chart").getContext("2d");
+const chartData = {
+    labels: [],
+    datasets: [{
+        label: "Преместване",
+        data: [],
+        borderColor: 'rgba(75, 192, 192, 1)',
+        fill: false,
+        tension: 0.1
+    }]
+};
+
+const chart = new Chart(chartCtx, {
+    type: 'line',
+    data: chartData,
+    options: {
+        responsive: true,
+        scales: {
+            x: { title: { display: true, text: 'Време (s)' } },
+            y: { title: { display: true, text: 'Позиция (m)' }, min: -1, max: 1 }
+        }
+    }
+});
+
 
 function animate() {
     requestAnimationFrame(animate);
 
     if (root) {
-        root.rotation.y += 0.005;
+        if (isAnimating && sphere && spring && empty) {
+            let length = parseFloat(lengthSlider.value);
+            let timeNow = performance.now() / 1000;
+
+            // Масата и k
+            let mass = parseFloat(massSlider.value);
+            let k = springConstant;
+
+            // Реална ъглова честота (ω = √(k/m))
+            let omega = Math.sqrt(k / mass);
+            let amplitude = 0.2;
+
+            // Осцилация според реална физика
+            let currentLength = length + Math.sin(timeNow * omega) * amplitude;
+
+            spring.scale.z = currentLength;
+            sphere.position.y = -6 * currentLength;
+
+            let x = (-sphere.position.y / 6) - length;
+
+            if (prevPositionY !== null && prevTime !== null) {
+                let dt = timeNow - prevTime;
+                let velocity = (sphere.position.y - prevPositionY) / dt;
+
+                let potentialEnergy = 0.5 * k * x * x;
+                let kineticEnergy = 0.5 * mass * velocity * velocity;
+                let totalEnergy = potentialEnergy + kineticEnergy;
+
+                document.getElementById('potential-energy').textContent = potentialEnergy.toFixed(3);
+                document.getElementById('kinetic-energy').textContent = kineticEnergy.toFixed(3);
+                document.getElementById('total-energy').textContent = totalEnergy.toFixed(3);
+            }
+
+            prevPositionY = sphere.position.y;
+            prevTime = timeNow;
+        }
+
 
     }
     controls.update();

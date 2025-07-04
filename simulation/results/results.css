@@ -1,0 +1,118 @@
+/* Стилизиране на контейнера за параметрите */
+body {
+    background-color: #e9e7e7; /* светло сив фон */
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.params {
+    position: relative;
+    max-width: 60%;           /* по-умерена ширина */
+    margin: 0 auto 30px auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 22px 28px;       /* малко по-голям padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
+    font-size: 17px;          /* по-голям, но не прекалено */
+    color: #2c3e50;
+    font-weight: 600;
+    user-select: none;
+    text-align: center;
+}
+
+.params strong {
+    color: #3498db;
+}
+
+/* Заглавие */
+.title-wrapper {
+  text-align: center;
+  margin: 35px 0 25px 0;
+}
+
+.title-wrapper h1 {
+  display: inline-block;
+  font-size: 26px;          /* умерен размер заглавие */
+  font-weight: 700;
+  color: #2c3e50;
+  user-select: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #3498db;
+  margin: 0;
+}
+
+/* Стилизиране на таблицата */
+table {
+    width: 60%;              /* по-умерена ширина */
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+    font-size: 16px;          /* малко по-голям текст */
+    color: #2c3e50;
+    user-select: none;
+}
+
+thead {
+    background: linear-gradient(135deg, #3498db, #2c3e50);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+th, td {
+    padding: 15px 18px;       /* увеличен padding */
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f0f7ff;
+}
+
+tbody tr:hover {
+    background-color: #d0e3fc;
+}
+
+th {
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+/* При по-малки екрани */
+@media (max-width: 700px) {
+    table, .params {
+        width: 90%;
+    }
+    th, td {
+        padding: 12px 10px;
+        font-size: 14px;
+    }
+    .title-wrapper h1 {
+        font-size: 22px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #3498db;
+    }
+}
+
+@media (max-width: 400px) {
+    table, .params {
+        width: 95%;
+    }
+    th, td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    .title-wrapper h1 {
+        font-size: 18px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #3498db;
+    }
+}

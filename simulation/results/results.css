@@ -1,6 +1,6 @@
-/* Стилизиране на контейнера за параметрите */
+
 body {
-    background-color: #e9e7e7; /* светло сив фон */
+    background-color: #e9e7e7; 
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -8,13 +8,13 @@ body {
 
 .params {
     position: relative;
-    max-width: 60%;           /* по-умерена ширина */
+    max-width: 60%;        
     margin: 0 auto 30px auto;
     background: rgba(255, 255, 255, 0.95);
-    padding: 22px 28px;       /* малко по-голям padding */
+    padding: 22px 28px;      
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
-    font-size: 17px;          /* по-голям, но не прекалено */
+    font-size: 17px;         
     color: #2c3e50;
     font-weight: 600;
     user-select: none;
@@ -33,7 +33,7 @@ body {
 
 .title-wrapper h1 {
   display: inline-block;
-  font-size: 26px;          /* умерен размер заглавие */
+  font-size: 26px;         
   font-weight: 700;
   color: #2c3e50;
   user-select: none;
@@ -45,16 +45,16 @@ body {
   margin: 0;
 }
 
-/* Стилизиране на таблицата */
+
 table {
-    width: 60%;              /* по-умерена ширина */
+    width: 60%;             
     margin: 0 auto;
     border-collapse: separate;
     border-spacing: 0;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
     box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-    font-size: 16px;          /* малко по-голям текст */
+    font-size: 16px;        
     color: #2c3e50;
     user-select: none;
 }
@@ -66,7 +66,7 @@ thead {
 }
 
 th, td {
-    padding: 15px 18px;       /* увеличен padding */
+    padding: 15px 18px;     
     text-align: center;
     border-bottom: 1px solid #ddd;
 }
@@ -86,7 +86,7 @@ th {
     user-select: none;
 }
 
-/* При по-малки екрани */
+
 @media (max-width: 700px) {
     table, .params {
         width: 90%;

@@ -25,21 +25,36 @@
                 <div class="controls-section">
                     <h2>Параметри на махалото</h2>
                     <div class="control-group">
-                        <label for="mass-slider">Маса на топчето (kg):</label>
+                         <label for="mass-slider">
+                            Маса на топчето (kg):
+                            <span class="info-tooltip">?
+                                <span class="tooltip-text">Определя инерцията на махалото. При по-голяма маса се увеличава кинетичната и потенциалната енергия.</span>
+                            </span>
+                        </label>
                         <div class="slider-container">
                             <input type="range" id="mass-slider" min="0.01" max="2" step="0.01" value="0.2">
                             <input type="number" id="mass-input" min="0.01" max="2" step="0.01" value="0.2" class="value-input">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label for="length-slider">Дължина на нишката (m):</label>
+                        <label for="length-slider">
+                            Дължина на нишката (m):
+                            <span class="info-tooltip">?
+                                <span class="tooltip-text">Определя периода на махалото. При по-дълга нишка трептенията стават по-бавни. Формула: T = 2π√(L/g)</span>
+                            </span>
+                        </label>
                         <div class="slider-container">
                             <input type="range" id="length-slider" min="0.5" max="2" step="0.01" value="1.1">
                             <input type="number" id="length-input" min="0.5" max="2" step="0.01" value="1.1" class="value-input">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label for="angle-slider">Ъгъл на отклонение (°):</label>
+                          <label for="angle-slider">
+                                Ъгъл на отклонение (°):
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Първоначалният ъгъл определя началната енергия и амплитуда. При малки ъгли махалото се доближава до хармонично движение.</span>
+                                </span>
+                            </label>
                         <div class="slider-container">
                             <input type="range" id="angle-slider" min="0" max="90" step="1" value="0">
                             <input type="number" id="angle-input" min="0" max="90" step="1" value="0" class="value-input">
@@ -70,15 +85,35 @@
                     <h2>Енергии</h2>
                     <div class="energy-display">
                         <div class="energy-value">
-                            <label>Потенциална енергия:</label>
+                            <label>Период на трептене:
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Формулата: T = 2π√(L/g), където L е дължината на нишката.</span>
+                                </span>
+                            </label>
+                            <span id="period-value">0.00</span> s
+                        </div>
+                        <div class="energy-value">
+                           <label>Потенциална енергия:
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Потенциалната енергия е енергията, съхранена поради позицията. Формула: E = mgh</span>
+                                </span>
+                            </label>
                             <span id="potential-energy">0.00</span> J
                         </div>
                         <div class="energy-value">
-                            <label>Кинетична енергия:</label>
+                           <label>Кинетична енергия:
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Кинетичната енергия е енергията на движение. Формула: E = ½mv²</span>
+                                </span>
+                            </label>
                             <span id="kinetic-energy">0.00</span> J
                         </div>
                         <div class="energy-value total">
-                            <label>Обща енергия:</label>
+                            <label>Обща енергия:
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Механичната енергия е сбор от кинетичната и потенциалната енергия: E = Ek + Ep</span>
+                                </span>
+                            </label>
                             <span id="total-energy">0.00</span> J
                         </div>
                     </div>
@@ -88,5 +123,6 @@
         </div>
     <script type="module" src="index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 </html>

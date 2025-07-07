@@ -63,11 +63,13 @@ lengthSlider.addEventListener("input", (e) => {
     const value = parseFloat(e.target.value);
     lengthInput.value = value;
     updateStringLength(value);
+    updatePeriodDisplay();
 });
 lengthInput.addEventListener("input", (e) => {
     const value = parseFloat(e.target.value);
     lengthSlider.value = value;
     updateStringLength(value);
+    updatePeriodDisplay();
 });
 
 let angle = 0;
@@ -206,6 +208,11 @@ const angleChart = new Chart(chartCtx, {
 
 });
 
+function updatePeriodDisplay() {
+    const length = parseFloat(lengthInput.value);
+    const period = 2 * Math.PI * Math.sqrt(length / g);
+    document.getElementById("period-value").textContent = period.toFixed(2);
+}
 
 
 
@@ -264,24 +271,24 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-
-
-
 document.getElementById("view-results-btn").addEventListener("click", () => {
-    const data = {
-        timeLabels: chartData.labels,
-        angleValues: chartData.datasets[0].data,
-        mass: parseFloat(massInput.value),
-        length: parseFloat(lengthInput.value)
-    };
+    const length = parseFloat(lengthInput.value);
+    const period = 2 * Math.PI * Math.sqrt(length / g);
+
+const data = {
+    timeLabels: chartData.labels,
+    angleValues: chartData.datasets[0].data,
+    mass: parseFloat(massInput.value),
+    length: length,
+    period: period
+};
+
 
 
     localStorage.setItem('pendulumResults', JSON.stringify(data));
 
     window.open('results/simple-pendulum.html', '_blank');
 });
-
-
 
 animate();
 

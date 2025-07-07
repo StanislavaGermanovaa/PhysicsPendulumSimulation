@@ -36,9 +36,11 @@
     // Попълваме параметрите
     const paramsDiv = document.getElementById('params');
     paramsDiv.innerHTML = `
-        <p><strong>Маса на топчето:</strong> ${mass.toFixed(2)} кг</p>
-        <p><strong>Дължина на нишката:</strong> ${length.toFixed(2)} м</p>
-    `;
+    <p><strong>Маса на топчето:</strong> ${mass.toFixed(2)} кг</p>
+    <p><strong>Дължина на нишката:</strong> ${length.toFixed(2)} м</p>
+    <p><strong>Период на трептене:</strong> ${data.period.toFixed(2)} s</p>
+`;
+
 
 
     const tbody = document.getElementById('results-body');

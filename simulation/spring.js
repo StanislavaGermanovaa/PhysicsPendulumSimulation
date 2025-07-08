@@ -175,7 +175,19 @@ resetBtn.addEventListener("click", () => {
     
     if (spring) spring.scale.z = length;
     if (sphere) sphere.position.y = -6 * length;
+
+    chartData.labels = [];
+    chartData.datasets[0].data = [];
+    chart.update();
+
+    potentialEnergyElem.textContent = '0.00';
+    kineticEnergyElem.textContent = '0.00';
+    totalEnergyElem.textContent = '0.00';
+    document.getElementById('period-value').textContent = '0.00';
 });
+
+
+
 
 const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
@@ -195,12 +207,35 @@ const chart = new Chart(chartCtx, {
     options: {
         responsive: true,
         scales: {
-            x: { title: { display: true, text: 'Време (s)' } },
-            y: { title: { display: true, text: 'Позиция (m)' }, min: -1, max: 1 }
+            x: {
+                display: false
+            },
+            y: {
+                title: { display: true, text: 'Позиция (m)' },
+                min: -1,
+                max: 1
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        return "Време: " + tooltipItems[0].label + " s";
+                    },
+                    label: function(tooltipItem) {
+                        return "Позиция: " + tooltipItem.formattedValue + " m";
+                    }
+                }
+            },
+            legend: {
+                display: false
+            }
         }
     }
 });
 
+
+let lastChartUpdateSecond = 0;
 
 function animate() {
     requestAnimationFrame(animate);
@@ -210,15 +245,14 @@ function animate() {
             let length = parseFloat(lengthSlider.value);
             let timeNow = performance.now() / 1000;
 
-            // Масата и k
             let mass = parseFloat(massSlider.value);
             let k = springConstant;
 
-            // Реална ъглова честота (ω = √(k/m))
-            let omega = Math.sqrt(k / mass);
-            let amplitude = 0.2;
+            let period = 2 * Math.PI * Math.sqrt(mass / k);
 
-            // Осцилация според реална физика
+            let omega = Math.sqrt(k / mass);
+            let amplitude = parseFloat(lengthSlider.value) / 2;
+
             let currentLength = length + Math.sin(timeNow * omega) * amplitude;
 
             spring.scale.z = currentLength;
@@ -237,6 +271,24 @@ function animate() {
                 document.getElementById('potential-energy').textContent = potentialEnergy.toFixed(3);
                 document.getElementById('kinetic-energy').textContent = kineticEnergy.toFixed(3);
                 document.getElementById('total-energy').textContent = totalEnergy.toFixed(3);
+                document.getElementById('period-value').textContent = period.toFixed(3);
+            }
+
+            let now = performance.now() / 1000; 
+            let dtChart = now - lastChartUpdateSecond;
+
+            if (dtChart >= 0.1) {
+                let yPosition = (-sphere.position.y / 6);  
+                chartData.labels.push(now.toFixed(2));
+                chartData.datasets[0].data.push(yPosition.toFixed(3));
+
+                if (chartData.labels.length > 50) {
+                    chartData.labels.shift();
+                    chartData.datasets[0].data.shift();
+                }
+
+                chart.update('none');
+                lastChartUpdateSecond = now;
             }
 
             prevPositionY = sphere.position.y;

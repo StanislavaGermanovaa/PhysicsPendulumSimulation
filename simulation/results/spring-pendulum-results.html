@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8" />
+    <title>Резултати от симулацията</title>
+    <link rel="stylesheet" href="results.css" />
+</head>
+<body>
+    <div class="title-wrapper">
+        <h1>Резултати от симулацията</h1>
+    </div>
+    <div class="params" id="params"></div>
+    <table>
+        <thead>
+            <tr>
+                <th>Време (s)</th>
+                <th>Позиция (m)</th>
+                <th>Потенциална енергия (J)</th>
+                <th>Кинетична енергия (J)</th>
+                <th>Обща енергия (J)</th>
+            </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+    </table>
+
+    <script>
+       const dataStr = localStorage.getItem('springPendulumResults');
+        if (!dataStr) {
+            document.body.innerHTML = '<p style="text-align:center; color:red;">Няма налични резултати за показване.</p>';
+            throw new Error('No results data found');
+        }
+
+        const data = JSON.parse(dataStr);
+        const { timeLabels, displacementValues, mass, springConstant, amplitude } = data;
+
+        const paramsDiv = document.getElementById('params');
+        paramsDiv.innerHTML = `
+            <p><strong>Маса:</strong> ${mass.toFixed(2)} кг</p>
+            <p><strong>Пружинна константа:</strong> ${springConstant.toFixed(2)} N/m</p>
+            <p><strong>Равновесна дължина:</strong> ${amplitude.toFixed(2)} м</p>
+        `;
+
+        const tbody = document.getElementById('results-body');
+        const maxRows = 50;
+        const g = 9.81;
+
+        for (let i = 0; i < timeLabels.length; i++) {
+            const x = parseFloat(displacementValues[i]); // отклонение от равновесие
+            const potentialElastic = 0.5 * springConstant * x * x;
+            const potentialGrav = mass * g * x;
+            const totalPotential = potentialElastic + potentialGrav;
+
+            const dx = (i > 0) ? parseFloat(displacementValues[i]) - parseFloat(displacementValues[i - 1]) : 0;
+            const v = dx / 0.1; // при интервал 0.1s
+
+            const kineticEnergy = 0.5 * mass * v * v;
+            const totalEnergy = totalPotential + kineticEnergy;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${timeLabels[i]}</td>
+                <td>${x.toFixed(3)}</td>
+                <td>${totalPotential.toFixed(2)}</td>
+                <td>${kineticEnergy.toFixed(2)}</td>
+                <td>${totalEnergy.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+
+            while (tbody.rows.length > maxRows) {
+                tbody.deleteRow(0);
+            }
+        }
+
+    </script>
+</body>
+</html>

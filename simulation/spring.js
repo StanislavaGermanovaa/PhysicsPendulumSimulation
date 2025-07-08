@@ -302,4 +302,25 @@ function animate() {
 }
 
 
+
+document.getElementById("view-results-btn").addEventListener("click", () => {
+    const amplitude = parseFloat(lengthInput.value);
+    const mass = parseFloat(massInput.value);
+    const k = parseFloat(kInput.value);
+    const period = 2 * Math.PI * Math.sqrt(mass / k);
+
+    const data = {
+        timeLabels: chartData.labels,
+        displacementValues: chartData.datasets[0].data,
+        mass: mass,
+        amplitude: amplitude,
+        springConstant: k,
+        period: period
+    };
+
+    localStorage.setItem('springPendulumResults', JSON.stringify(data));
+    window.open('results/spring-pendulum-results.html', '_blank');
+});
+
+
 animate();

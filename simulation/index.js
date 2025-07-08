@@ -256,12 +256,9 @@ function animate() {
                 chartData.labels.shift();
                 chartData.datasets[0].data.shift();
             }
-
             angleChart.update('none');
             lastChartUpdateSecond = time;
         }
-
-
             const now = performance.now() / 1000;
             time = now - startTime;
         }
@@ -282,9 +279,6 @@ const data = {
     length: length,
     period: period
 };
-
-
-
     localStorage.setItem('pendulumResults', JSON.stringify(data));
 
     window.open('results/simple-pendulum.html', '_blank');

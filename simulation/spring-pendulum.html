@@ -26,7 +26,11 @@
                     <h2>Параметри на пружинното махало</h2>
 
                     <div class="control-group">
-                        <label for="mass-slider">Маса (kg):</label>
+                        <label for="mass-slider">Маса на топчето (kg):
+                            <span class="info-tooltip">?
+                                <span class="tooltip-text">Масата влияе на периода на трептене. По-голяма маса води до по-бавно движение.</span>
+                            </span>
+                        </label>
                         <div class="slider-container">
                            <input type="range" id="mass-slider" min="0.01" max="2" step="0.01" value="0.2">
                             <input type="number" id="mass-input" min="0.01" max="2" step="0.01" value="0.2" class="value-input">
@@ -34,7 +38,11 @@
                     </div>
 
                     <div class="control-group">
-                        <label for="amplitude-slider">Амплитуда на отклонение (m):</label>
+                        <label for="amplitude-slider">Амплитуда на отклонение (m):
+                            <span class="info-tooltip">?
+                                <span class="tooltip-text">Амплитудата определя максималното отклонение от равновесното положение.</span>
+                            </span>
+                        </label>
                         <div class="slider-container">
                             <input type="range" id="amplitude-slider" min="0.3" max="0.6" step="0.01" value="0.4">
                             <input type="number" id="amplitude-input" min="0.3" max="0.6" step="0.01" value="0.4" class="value-input">
@@ -42,7 +50,11 @@
                     </div>
 
                      <div class="control-group">
-                        <label for="k-slider">Пружинна константа k (N/m):</label>
+                        <label for="k-slider">Пружинна константа k (N/m):
+                            <span class="info-tooltip">?
+                                <span class="tooltip-text">Пружинната константа показва колко е твърда пружината. По-висока стойност означава по-малко удължение при същата сила и по-бързи трептения.</span>
+                            </span>
+                        </label>
                         <div class="slider-container">
                             <input type="range" id="k-slider" min="1" max="10" step="0.1" value="5">
                             <input type="number" id="k-input" min="1" max="10" step="0.1" value="5" class="value-input">
@@ -70,7 +82,7 @@
 
         <div class="graph-container">
             <div class="graph-content">
-                <h2>Графика на преместване</h2>
+               <h2>Графика на преместване</h2>
                 <canvas id="chart" width="400" height="200"></canvas>
                 <div class="controls-section energy-section">
                     <h2>Енергии</h2>

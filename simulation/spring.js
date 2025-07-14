@@ -147,10 +147,6 @@ let animationId = null;
 let prevPositionY = null;
 let prevTime = null;
 
-// const potentialEnergyElem = document.getElementById('potential-energy');
-// const kineticEnergyElem = document.getElementById('kinetic-energy');
-// const totalEnergyElem = document.getElementById('total-energy');
-
 const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const resetBtn = document.getElementById("reset-btn");
@@ -287,9 +283,6 @@ const energyChart = new Chart(energyChartCtx, {
 });
 
 
-
-
-
 let lastChartUpdateSecond = 0;
 
 function animate() {
@@ -297,40 +290,28 @@ function animate() {
 
     if (root) {
         if (isAnimating && sphere && spring && empty) {
-            const lengthEquilibrium = parseFloat(lengthSlider.value); // равновесна дължина на пружината
+            const lengthEquilibrium = parseFloat(lengthSlider.value); 
             const mass = parseFloat(massSlider.value);
             const k = springConstant;
 
             const timeNow = performance.now() / 1000;
 
-            // Ъглова честота
             const omega = Math.sqrt(k / mass);
-
-            // Амплитуда - може да зададеш отделно, например 0.1 метра или 10% от равновесната дължина
-            const amplitude = 0.1; // например 10 см
-
-            // Изчисляване на текущото отклонение x(t)
+            const amplitude = 0.1; 
             const x = amplitude * Math.sin(omega * timeNow);
-
-            // Обновяване дължината на пружината
             const currentLength = lengthEquilibrium + x;
 
-            // Обновяване мащаба и позицията на обектите в сцената
             spring.scale.z = currentLength;
             sphere.position.y = -6 * currentLength;
 
-            // Изчисляване на скорост v = dx/dt = A * ω * cos(ωt)
             const velocity = amplitude * omega * Math.cos(omega * timeNow);
 
-            // Енергии
             const potentialEnergy = 0.5 * k * x * x;
             const kineticEnergy = 0.5 * mass * velocity * velocity;
             const totalEnergy = potentialEnergy + kineticEnergy;
 
-            // Период на трептене
             const period = 2 * Math.PI * Math.sqrt(mass / k);
 
-            // Актуализация на графиката
             energyChart.data.datasets[0].data = [
                 potentialEnergy,
                 kineticEnergy,
@@ -339,11 +320,11 @@ function animate() {
             ];
             energyChart.update('none');
 
-            // Обновяване на графиката на положението (по избор)
+
             const now = timeNow;
             if (now - lastChartUpdateSecond >= 0.1) {
                 chartData.labels.push(now.toFixed(2));
-                chartData.datasets[0].data.push(x.toFixed(3)); // отклонението
+                chartData.datasets[0].data.push(x.toFixed(3));
 
                 if (chartData.labels.length > 50) {
                     chartData.labels.shift();

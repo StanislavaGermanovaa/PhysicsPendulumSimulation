@@ -147,9 +147,9 @@ let animationId = null;
 let prevPositionY = null;
 let prevTime = null;
 
-const potentialEnergyElem = document.getElementById('potential-energy');
-const kineticEnergyElem = document.getElementById('kinetic-energy');
-const totalEnergyElem = document.getElementById('total-energy');
+// const potentialEnergyElem = document.getElementById('potential-energy');
+// const kineticEnergyElem = document.getElementById('kinetic-energy');
+// const totalEnergyElem = document.getElementById('total-energy');
 
 const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
@@ -180,10 +180,8 @@ resetBtn.addEventListener("click", () => {
     chartData.datasets[0].data = [];
     chart.update();
 
-    potentialEnergyElem.textContent = '0.00';
-    kineticEnergyElem.textContent = '0.00';
-    totalEnergyElem.textContent = '0.00';
-    document.getElementById('period-value').textContent = '0.00';
+    energyChart.data.datasets[0].data = [0, 0, 0, 0];
+    energyChart.update();
 });
 
 
@@ -235,6 +233,63 @@ const chart = new Chart(chartCtx, {
 });
 
 
+const energyChartCtx = document.getElementById("energyChart").getContext("2d");
+
+const energyChart = new Chart(energyChartCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Потенциална', 'Кинетична', 'Обща', 'Период'],
+        datasets: [{
+            label: 'Енергии и период',
+            data: [0, 0, 0, 0],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Стойност'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false 
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const index = context.dataIndex;
+                        const value = context.parsed.y.toFixed(2);
+                        const units = [' J', ' J', ' J', ' s']; 
+                        return `${context.label}: ${value}${units[index]}`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+
+
+
+
 let lastChartUpdateSecond = 0;
 
 function animate() {
@@ -242,45 +297,53 @@ function animate() {
 
     if (root) {
         if (isAnimating && sphere && spring && empty) {
-            let length = parseFloat(lengthSlider.value);
-            let timeNow = performance.now() / 1000;
+            const lengthEquilibrium = parseFloat(lengthSlider.value); // равновесна дължина на пружината
+            const mass = parseFloat(massSlider.value);
+            const k = springConstant;
 
-            let mass = parseFloat(massSlider.value);
-            let k = springConstant;
+            const timeNow = performance.now() / 1000;
 
-            let period = 2 * Math.PI * Math.sqrt(mass / k);
+            // Ъглова честота
+            const omega = Math.sqrt(k / mass);
 
-            let omega = Math.sqrt(k / mass);
-            let amplitude = parseFloat(lengthSlider.value) / 2;
+            // Амплитуда - може да зададеш отделно, например 0.1 метра или 10% от равновесната дължина
+            const amplitude = 0.1; // например 10 см
 
-            let currentLength = length + Math.sin(timeNow * omega) * amplitude;
+            // Изчисляване на текущото отклонение x(t)
+            const x = amplitude * Math.sin(omega * timeNow);
 
+            // Обновяване дължината на пружината
+            const currentLength = lengthEquilibrium + x;
+
+            // Обновяване мащаба и позицията на обектите в сцената
             spring.scale.z = currentLength;
             sphere.position.y = -6 * currentLength;
 
-            let x = (-sphere.position.y / 6) - length;
+            // Изчисляване на скорост v = dx/dt = A * ω * cos(ωt)
+            const velocity = amplitude * omega * Math.cos(omega * timeNow);
 
-            if (prevPositionY !== null && prevTime !== null) {
-                let dt = timeNow - prevTime;
-                let velocity = (sphere.position.y - prevPositionY) / dt;
+            // Енергии
+            const potentialEnergy = 0.5 * k * x * x;
+            const kineticEnergy = 0.5 * mass * velocity * velocity;
+            const totalEnergy = potentialEnergy + kineticEnergy;
 
-                let potentialEnergy = 0.5 * k * x * x;
-                let kineticEnergy = 0.5 * mass * velocity * velocity;
-                let totalEnergy = potentialEnergy + kineticEnergy;
+            // Период на трептене
+            const period = 2 * Math.PI * Math.sqrt(mass / k);
 
-                document.getElementById('potential-energy').textContent = potentialEnergy.toFixed(3);
-                document.getElementById('kinetic-energy').textContent = kineticEnergy.toFixed(3);
-                document.getElementById('total-energy').textContent = totalEnergy.toFixed(3);
-                document.getElementById('period-value').textContent = period.toFixed(3);
-            }
+            // Актуализация на графиката
+            energyChart.data.datasets[0].data = [
+                potentialEnergy,
+                kineticEnergy,
+                totalEnergy,
+                period
+            ];
+            energyChart.update('none');
 
-            let now = performance.now() / 1000; 
-            let dtChart = now - lastChartUpdateSecond;
-
-            if (dtChart >= 0.1) {
-                let yPosition = (-sphere.position.y / 6);  
+            // Обновяване на графиката на положението (по избор)
+            const now = timeNow;
+            if (now - lastChartUpdateSecond >= 0.1) {
                 chartData.labels.push(now.toFixed(2));
-                chartData.datasets[0].data.push(yPosition.toFixed(3));
+                chartData.datasets[0].data.push(x.toFixed(3)); // отклонението
 
                 if (chartData.labels.length > 50) {
                     chartData.labels.shift();
@@ -290,16 +353,13 @@ function animate() {
                 chart.update('none');
                 lastChartUpdateSecond = now;
             }
-
-            prevPositionY = sphere.position.y;
-            prevTime = timeNow;
         }
-
-
     }
+
     controls.update();
     renderer.render(scene, camera);
 }
+
 
 
 

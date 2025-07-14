@@ -32,8 +32,8 @@
                             </span>
                         </label>
                         <div class="slider-container">
-                            <input type="range" id="mass-slider" min="0.01" max="2" step="0.01" value="0.2">
-                            <input type="number" id="mass-input" min="0.01" max="2" step="0.01" value="0.2" class="value-input">
+                            <input type="range" id="mass-slider" min="0.01" max="1" step="0.01" value="1">
+                            <input type="number" id="mass-input" min="0.01" max="1" step="0.01" value="1" class="value-input">
                         </div>
                     </div>
                     <div class="control-group">
@@ -69,6 +69,7 @@
                             <button id="pause-btn">Пауза</button>
                             <button id="reset-btn">Нулиране</button>
                         </div>
+                        <button id="view-results-btn">Резултати</button>
                         <button id="spring-btn" onclick="location.href='spring-pendulum.html'">Пружинно махало</button>
                     </div>
                 </div>
@@ -77,48 +78,26 @@
         <div class="canvas">
             <canvas class="webgl"></canvas>
         </div>
+
         <div class="graph-container">
             <div class="graph-content">
                 <h2>Графика на трептенията</h2>
-                <canvas id="chart" width="400" height="200"></canvas>
-                <div class="controls-section energy-section">
-                    <h2>Енергии</h2>
-                    <div class="energy-display">
-                        <div class="energy-value">
-                            <label>Период на трептене:
-                                <span class="info-tooltip">?
-                                    <span class="tooltip-text">Формулата: T = 2π√(L/g), където L е дължината на нишката.</span>
-                                </span>
-                            </label>
-                            <span id="period-value">0.00</span> s
-                        </div>
-                        <div class="energy-value">
-                           <label>Потенциална енергия:
-                                <span class="info-tooltip">?
-                                    <span class="tooltip-text">Потенциалната енергия е енергията, съхранена поради позицията. Формула: E = mgh</span>
-                                </span>
-                            </label>
-                            <span id="potential-energy">0.00</span> J
-                        </div>
-                        <div class="energy-value">
-                           <label>Кинетична енергия:
-                                <span class="info-tooltip">?
-                                    <span class="tooltip-text">Кинетичната енергия е енергията на движение. Формула: E = ½mv²</span>
-                                </span>
-                            </label>
-                            <span id="kinetic-energy">0.00</span> J
-                        </div>
-                        <div class="energy-value total">
-                            <label>Обща енергия:
-                                <span class="info-tooltip">?
-                                    <span class="tooltip-text">Механичната енергия е сбор от кинетичната и потенциалната енергия: E = Ek + Ep</span>
-                                </span>
-                            </label>
-                            <span id="total-energy">0.00</span> J
-                        </div>
-                    </div>
+                <canvas id="chart" width="400" height="200"></canvas>                    
+                <div class="diagram-header">
+                    <h2>
+                        Диаграма на енергиите и периода на трептене: 
+                        <span class="info-tooltip">?
+                            <span class="tooltip-text">
+                                Диаграмата показва енергийното състояние на махалото:
+                                <br><strong>Потенциална енергия:</strong> E = mgh
+                                <br><strong>Кинетична енергия:</strong> E = ½mv²
+                                <br><strong>Обща енергия:</strong> E = Ek + Ep
+                                <br><strong>Период:</strong> T = 2π√(L/g)
+                            </span>
+                        </span>
+                    </h2>
                 </div>
-                <button id="view-results-btn">Резултати</button>
+                <canvas id="energyChart" width="300" height="240"></canvas>
             </div>
         </div>
     <script type="module" src="index.js"></script>

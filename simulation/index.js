@@ -157,14 +157,24 @@ resetBtn.addEventListener("click", () => {
 
     if (empty) empty.rotation.x = 0;
 
+    // Нулиране на данните в основната графика
     chartData.labels.length = 0;
     chartData.datasets[0].data.length = 0;
     angleChart.update();
 
+    // Нулиране на стойностите в диаграмата за енергия
+    energyChart.data.datasets[0].data = [0, 0, 0, 0];
+    energyChart.update();
+
+    // Нулиране на показаните стойности на енергията и периода
     ["potential-energy", "kinetic-energy", "total-energy"].forEach(id => {
-        document.getElementById(id).textContent = "0.00";
+        const el = document.getElementById(id);
+        if (el) el.textContent = "0.00";
     });
+
+    document.getElementById("period-value").textContent = "0.00";
 });
+
 
 const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
@@ -216,6 +226,65 @@ function updatePeriodDisplay() {
 
 
 
+
+
+
+const energyChartCtx = document.getElementById("energyChart").getContext("2d");
+
+const energyChart = new Chart(energyChartCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Потенциална', 'Кинетична', 'Обща', 'Период'],
+        datasets: [{
+            label: 'Енергии и период',
+            data: [0, 0, 0, 0],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Стойност'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false 
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const index = context.dataIndex;
+                        const value = context.parsed.y.toFixed(2);
+                        const units = [' J', ' J', ' J', ' s']; 
+                        return `${context.label}: ${value}${units[index]}`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+
+
+
 let lastChartUpdateSecond = -1;
 
 function animate() {
@@ -242,9 +311,24 @@ function animate() {
 
             const totalEnergy = potentialEnergy + kineticEnergy;
 
-            document.getElementById("potential-energy").textContent = potentialEnergy.toFixed(2);
-            document.getElementById("kinetic-energy").textContent = kineticEnergy.toFixed(2);
-            document.getElementById("total-energy").textContent = totalEnergy.toFixed(2);
+            const potEl = document.getElementById("potential-energy");
+            const kinEl = document.getElementById("kinetic-energy");
+            const totalEl = document.getElementById("total-energy");
+
+            if (potEl) potEl.textContent = potentialEnergy.toFixed(2);
+            if (kinEl) kinEl.textContent = kineticEnergy.toFixed(2);
+            if (totalEl) totalEl.textContent = totalEnergy.toFixed(2);
+
+            energyChart.data.datasets[0].data[0] = potentialEnergy;
+            energyChart.data.datasets[0].data[0] = potentialEnergy;
+            energyChart.data.datasets[0].data[1] = kineticEnergy;
+            energyChart.data.datasets[0].data[2] = totalEnergy;
+
+            // изчисление на периода (ако се променя в реално време)
+            const period = 2 * Math.PI * Math.sqrt(length / g);
+            energyChart.data.datasets[0].data[3] = period;
+
+            energyChart.update('none');
 
             const currentAngleDeg = theta * (180 / Math.PI);
 

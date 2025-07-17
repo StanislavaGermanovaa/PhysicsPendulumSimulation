@@ -9,67 +9,135 @@
     <div class="title-wrapper">
         <h1>Резултати от симулацията</h1>
     </div>
-    <div class="params" id="params"></div>
-    <table>
-        <thead>
-            <tr>
-                <th>Време (s)</th>
-                <th>Ъгъл (°)</th>
-                <th>Потенциална енергия (J)</th>
-                <th>Кинетична енергия (J)</th>
-                <th>Обща енергия (J)</th>
-            </tr>
-        </thead>
-        <tbody id="results-body"></tbody>
-    </table>
+    <table id="params-table"></table>
 
-   <script>
-    const dataStr = localStorage.getItem('pendulumResults');
-    if (!dataStr) {
-        document.body.innerHTML = '<p style="text-align:center; color:red;">Няма налични резултати за показване.</p>';
-        throw new Error('No results data found');
-    }
-    const data = JSON.parse(dataStr);
-    const { timeLabels, angleValues, mass, length } = data;
-    const g = 9.81;
+    <script>
+const dataStr = localStorage.getItem('pendulumResults');
+if (!dataStr) {
+  document.body.innerHTML = '<p style="text-align:center; color:red;">Няма налични резултати за показване.</p>';
+  throw new Error('No results data found');
+}
 
-    const paramsDiv = document.getElementById('params');
-    paramsDiv.innerHTML = `
-    <p><strong>Маса на топчето:</strong> ${mass.toFixed(2)} кг</p>
-    <p><strong>Дължина на нишката:</strong> ${length.toFixed(2)} м</p>
-    <p><strong>Период на трептене:</strong> ${data.period.toFixed(2)} s</p>
+const data = JSON.parse(dataStr);
+const { timeLabels, angleValues, mass, length, initialAngle, period } = data;
+const g = 9.81;
+
+const maxAngle = initialAngle;
+const minAngle = -initialAngle;
+
+let dt = 0.1;
+if (timeLabels.length > 1) {
+  dt = parseFloat(timeLabels[1]) - parseFloat(timeLabels[0]);
+}
+
+const totalEnergy = mass * g * length * (1 - Math.cos(maxAngle * Math.PI / 180));
+
+let maxKE = -Infinity;
+let minKE = Infinity;
+let maxPE = -Infinity;
+let minPE = Infinity;
+
+for (let i = 0; i < timeLabels.length; i++) {
+  const angleDeg = parseFloat(angleValues[i]);
+  const thetaRad = angleDeg * (Math.PI / 180);
+  const height = length * (1 - Math.cos(thetaRad));
+
+  let angularVelocity = 0;
+  if (i > 0 && i < angleValues.length - 1) {
+    const prev = parseFloat(angleValues[i - 1]) * (Math.PI / 180);
+    const next = parseFloat(angleValues[i + 1]) * (Math.PI / 180);
+    angularVelocity = (next - prev) / (2 * dt);
+  }
+
+  const v = length * angularVelocity;
+  const potentialEnergy = mass * g * height;
+  const kineticEnergy = 0.5 * mass * v * v;
+
+  if (kineticEnergy > maxKE) maxKE = kineticEnergy;
+  if (kineticEnergy < minKE) minKE = kineticEnergy;
+  if (potentialEnergy > maxPE) maxPE = potentialEnergy;
+  if (potentialEnergy < minPE) minPE = potentialEnergy;
+}
+
+const paramsTable = document.getElementById('params-table');
+paramsTable.innerHTML = `
+  <thead>
+      <tr><th colspan="2">Основни параметри на махалото</th></tr>
+  </thead>
+  <tbody>
+      <tr><td>Маса на топчето:</td><td><strong>${mass.toFixed(2)} кг</strong></td></tr>
+      <tr><td>Дължина на нишката:</td><td><strong>${length.toFixed(2)} м</strong></td></tr>
+      <tr><td>Период на трептене:</td><td><strong>${period.toFixed(2)} s</strong></td></tr>
+      <tr><td>Максимален ъгъл:</td><td><strong>${maxAngle.toFixed(1)}°</strong></td></tr>
+      <tr><td>Минимален ъгъл:</td><td><strong>${minAngle.toFixed(1)}°</strong></td></tr>
+      <tr><td>Макс. кинетична енергия:</td><td><strong>${(totalEnergy - minPE).toFixed(2)} J</strong></td></tr>
+      <tr><td>Макс. потенциална енергия:</td><td><strong>${maxPE.toFixed(2)} J</strong></td></tr>
+      <tr><td>Обща механична енергия:</td><td><strong>${totalEnergy.toFixed(2)} J</strong></td></tr>
+  </tbody>
 `;
 
+const energyTable = document.createElement('table');
+energyTable.innerHTML = `
+  <thead>
+      <tr>
+          <th>Ъгъл (°)</th>
+          <th>Потенциална енергия (J)</th>
+          <th>Кинетична енергия (J)</th>
+          <th>Обща енергия (J)</th>
+      </tr>
+  </thead>
+  <tbody id="fixed-angle-body"></tbody>
+`;
+document.body.appendChild(energyTable);
 
+const fixedTbody = energyTable.querySelector('tbody');
 
-    const tbody = document.getElementById('results-body');
-    const maxRows = 50; 
-    for (let i = 0; i < timeLabels.length; i++) {
-        const thetaRad = parseFloat(angleValues[i]) * (Math.PI / 180);
-        const height = length * (1 - Math.cos(thetaRad));
-        const v = length * ((i > 0 ? (parseFloat(angleValues[i]) - parseFloat(angleValues[i - 1])) / 0.1 : 0) * Math.PI / 180);
+function generateCustomAngleSteps(startAngle) {
+  const angles = [];
+  angles.push(Math.round(startAngle * 100) / 100);
 
-        const potentialEnergy = mass * g * height;
-        const kineticEnergy = 0.5 * mass * v * v;
-        const totalEnergy = potentialEnergy + kineticEnergy;
+  let current = Math.floor(startAngle / 5) * 5;
+  if (current === startAngle) current -= 5;
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${timeLabels[i]}</td>
-            <td>${angleValues[i]}</td>
-            <td>${potentialEnergy.toFixed(2)}</td>
-            <td>${kineticEnergy.toFixed(2)}</td>
-            <td>${totalEnergy.toFixed(2)}</td>
-        `;
+  while (current > 0) {
+      angles.push(current);
+      current -= 5;
+  }
 
-        tbody.appendChild(row);
+  angles.push(0);
 
-        while (tbody.rows.length > maxRows) {
-            tbody.deleteRow(0);
-        }
-    }
+  current = -5;
+  while (current > -startAngle) {
+      angles.push(current);
+      current -= 5;
+  }
+
+  if (startAngle % 5 !== 0) {
+      angles.push(-Math.round(startAngle * 100) / 100);
+  }
+
+  return angles;
+}
+
+const fixedAngles = generateCustomAngleSteps(initialAngle);
+
+for (const angle of fixedAngles) {
+  const thetaRad = angle * Math.PI / 180;
+  const height = length * (1 - Math.cos(thetaRad));
+  const PE = mass * g * height;
+  let KE = totalEnergy - PE;
+  if (KE < 0) KE = 0;
+
+  const row = document.createElement('tr');
+  row.innerHTML = `
+      <td>${angle}</td>
+      <td>${PE.toFixed(2)}</td>
+      <td>${KE.toFixed(2)}</td>
+      <td>${totalEnergy.toFixed(2)}</td>
+  `;
+  fixedTbody.appendChild(row);
+}
 </script>
-
 </body>
 </html>
 

@@ -157,16 +157,13 @@ resetBtn.addEventListener("click", () => {
 
     if (empty) empty.rotation.x = 0;
 
-    // Нулиране на данните в основната графика
     chartData.labels.length = 0;
     chartData.datasets[0].data.length = 0;
     angleChart.update();
 
-    // Нулиране на стойностите в диаграмата за енергия
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
 
-    // Нулиране на показаните стойности на енергията и периода
     ["potential-energy", "kinetic-energy", "total-energy"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = "0.00";
@@ -361,8 +358,10 @@ const data = {
     angleValues: chartData.datasets[0].data,
     mass: parseFloat(massInput.value),
     length: length,
-    period: period
+    period: period,
+    initialAngle: parseFloat(angleInput.value)
 };
+
     localStorage.setItem('pendulumResults', JSON.stringify(data));
 
     window.open('results/simple-pendulum.html', '_blank');

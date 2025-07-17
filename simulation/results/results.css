@@ -1,4 +1,3 @@
-
 body {
     background-color: #e9e7e7; 
     margin: 0;
@@ -6,23 +5,37 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.params {
-    position: relative;
-    max-width: 60%;        
-    margin: 0 auto 30px auto;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 22px 28px;      
+/* Централна таблица с параметри в табличен вид */
+#params-table {
+    width: 50%;
+    margin: 0 auto 25px auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
-    font-size: 17px;         
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    font-size: 15px;
     color: #2c3e50;
-    font-weight: 600;
     user-select: none;
+}
+
+#params-table thead th {
+    background: linear-gradient(135deg, #3498db, #2c3e50);
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    font-size: 16px;
     text-align: center;
 }
 
-.params strong {
-    color: #3498db;
+#params-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+#params-table tbody tr:nth-child(even) {
+    background-color: #f8faff;
 }
 
 /* Заглавие */
@@ -45,7 +58,7 @@ body {
   margin: 0;
 }
 
-
+/* Останалите таблици (например за фиксирани ъгли) */
 table {
     width: 60%;             
     margin: 0 auto;
@@ -86,9 +99,9 @@ th {
     user-select: none;
 }
 
-
+/* Мобилна адаптация */
 @media (max-width: 700px) {
-    table, .params {
+    table, #params-table {
         width: 90%;
     }
     th, td {
@@ -103,7 +116,7 @@ th {
 }
 
 @media (max-width: 400px) {
-    table, .params {
+    table, #params-table {
         width: 95%;
     }
     th, td {
@@ -116,3 +129,4 @@ th {
         border-bottom: 2px solid #3498db;
     }
 }
+

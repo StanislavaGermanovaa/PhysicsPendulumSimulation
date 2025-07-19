@@ -2,75 +2,144 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8" />
-    <title>Резултати от симулацията</title>
+    <title>Резултати от пружинното махало</title>
     <link rel="stylesheet" href="results.css" />
 </head>
 <body>
     <div class="title-wrapper">
-        <h1>Резултати от симулацията</h1>
+        <h1>Резултати от симулацията на пружинно махало</h1>
     </div>
-    <div class="params" id="params"></div>
-    <table>
+
+    <table id="params-table"></table>
+
+    <script>
+    const dataStr = localStorage.getItem('springPendulumResults');
+    if (!dataStr) {
+        document.body.innerHTML = '<p style="text-align:center; color:red;">Няма налични резултати за показване.</p>';
+        throw new Error('No results data found');
+    }
+
+    const data = JSON.parse(dataStr);
+    const { timeLabels, displacementValues, mass, amplitude, springConstant, period } = data;
+
+    const equilibriumLength = 0.4;
+    const maxStretch = equilibriumLength + amplitude;
+    const minStretch = equilibriumLength - amplitude;
+    const totalEnergy = 0.5 * springConstant * amplitude * amplitude;
+
+    // Коректни максимални енергии според амплитудата (теоретични)
+    const maxPE_correct = totalEnergy; // при максимално отклонение (амплитуда)
+    const maxKE_correct = totalEnergy; // при равновесна точка (x=0)
+
+    // Изчисляване на реалните максимуми (от данните)
+    let maxPE_real = -Infinity;
+    let minPE_real = Infinity;
+    let maxKE_real = -Infinity;
+    let minKE_real = Infinity;
+
+    let dt = 0.1;
+    if (timeLabels.length > 1) {
+        dt = parseFloat(timeLabels[1]) - parseFloat(timeLabels[0]);
+    }
+
+    for (let i = 0; i < timeLabels.length; i++) {
+        const x = parseFloat(displacementValues[i]) - equilibriumLength;
+
+        const PE = 0.5 * springConstant * x * x;
+
+        let velocity = 0;
+        if (i > 0 && i < displacementValues.length - 1) {
+            const prev = parseFloat(displacementValues[i - 1]);
+            const next = parseFloat(displacementValues[i + 1]);
+            velocity = (next - prev) / (2 * dt);
+        }
+
+        const KE = 0.5 * mass * velocity * velocity;
+
+        if (PE > maxPE_real) maxPE_real = PE;
+        if (PE < minPE_real) minPE_real = PE;
+        if (KE > maxKE_real) maxKE_real = KE;
+        if (KE < minKE_real) minKE_real = KE;
+    }
+
+    const paramsTable = document.getElementById('params-table');
+    paramsTable.innerHTML = `
+        <thead>
+            <tr><th colspan="2">Основни параметри на пружинното махало</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Маса:</td><td><strong>${mass.toFixed(2)} кг</strong></td></tr>
+            <tr><td>Пружинна константа (k):</td><td><strong>${springConstant.toFixed(2)} N/m</strong></td></tr>
+            <tr><td>Амплитуда на отклонение:</td><td><strong>${amplitude.toFixed(2)} m</strong></td></tr>
+            <tr><td>Равновесна дължина:</td><td><strong>${equilibriumLength.toFixed(2)} m</strong></td></tr>
+            <tr><td>Максимално разтягане:</td><td><strong>${maxStretch.toFixed(2)} m</strong></td></tr>
+            <tr><td>Минимално разтягане:</td><td><strong>${minStretch.toFixed(2)} m</strong></td></tr>
+            <tr><td>Период:</td><td><strong>${period.toFixed(2)} s</strong></td></tr>
+            <tr><td>Макс. потенциална енергия (теоретична):</td><td><strong>${maxPE_correct.toFixed(2)} J</strong></td></tr>
+            <tr><td>Макс. кинетична енергия (теоретична):</td><td><strong>${maxKE_correct.toFixed(2)} J</strong></td></tr>
+            <tr><td>Обща механична енергия:</td><td><strong>${totalEnergy.toFixed(2)} J</strong></td></tr>
+        </tbody>
+    `;
+
+    // Таблица с енергии при дължини през 0.05 + крайности
+    const energyTable = document.createElement('table');
+    energyTable.innerHTML = `
         <thead>
             <tr>
-                <th>Време (s)</th>
-                <th>Позиция (m)</th>
+                <th>Дължина на пружината (m)</th>
                 <th>Потенциална енергия (J)</th>
                 <th>Кинетична енергия (J)</th>
                 <th>Обща енергия (J)</th>
             </tr>
         </thead>
-        <tbody id="results-body"></tbody>
-    </table>
+        <tbody id="energy-body"></tbody>
+    `;
+    document.body.appendChild(energyTable);
 
-    <script>
-       const dataStr = localStorage.getItem('springPendulumResults');
-        if (!dataStr) {
-            document.body.innerHTML = '<p style="text-align:center; color:red;">Няма налични резултати за показване.</p>';
-            throw new Error('No results data found');
-        }
+    const energyBody = document.getElementById('energy-body');
 
-        const data = JSON.parse(dataStr);
-        const { timeLabels, displacementValues, mass, springConstant, amplitude } = data;
+    const valuesSet = new Set();
 
-        const paramsDiv = document.getElementById('params');
-        paramsDiv.innerHTML = `
-            <p><strong>Маса:</strong> ${mass.toFixed(2)} кг</p>
-            <p><strong>Пружинна константа:</strong> ${springConstant.toFixed(2)} N/m</p>
-            <p><strong>Равновесна дължина:</strong> ${amplitude.toFixed(2)} м</p>
+    valuesSet.add(parseFloat(minStretch.toFixed(2)));
+    valuesSet.add(parseFloat(maxStretch.toFixed(2)));
+
+    for (let l = Math.ceil(minStretch * 20) / 20; l < maxStretch; l += 0.05) {
+        valuesSet.add(parseFloat(l.toFixed(2)));
+    }
+
+    valuesSet.add(equilibriumLength);
+
+    const lengths = Array.from(valuesSet).sort((a, b) => a - b);
+
+    for (const l of lengths) {
+        const x = l - equilibriumLength;
+        const PE = 0.5 * springConstant * x * x;
+        let KE = totalEnergy - PE;
+        if (KE < 0) KE = 0;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${l.toFixed(2)}</td>
+            <td>${PE.toFixed(2)}</td>
+            <td>${KE.toFixed(2)}</td>
+            <td>${totalEnergy.toFixed(2)}</td>
         `;
 
-        const tbody = document.getElementById('results-body');
-        const maxRows = 50;
-        const g = 9.81;
-
-        for (let i = 0; i < timeLabels.length; i++) {
-            const x = parseFloat(displacementValues[i]); // отклонение от равновесие
-            const potentialElastic = 0.5 * springConstant * x * x;
-            const potentialGrav = mass * g * x;
-            const totalPotential = potentialElastic + potentialGrav;
-
-            const dx = (i > 0) ? parseFloat(displacementValues[i]) - parseFloat(displacementValues[i - 1]) : 0;
-            const v = dx / 0.1; // при интервал 0.1s
-
-            const kineticEnergy = 0.5 * mass * v * v;
-            const totalEnergy = totalPotential + kineticEnergy;
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${timeLabels[i]}</td>
-                <td>${x.toFixed(3)}</td>
-                <td>${totalPotential.toFixed(2)}</td>
-                <td>${kineticEnergy.toFixed(2)}</td>
-                <td>${totalEnergy.toFixed(2)}</td>
-            `;
-            tbody.appendChild(row);
-
-            while (tbody.rows.length > maxRows) {
-                tbody.deleteRow(0);
-            }
+        if (Math.abs(l - equilibriumLength) < 0.001) {
+            row.style.backgroundColor = "#e0f7fa";
+            row.style.fontWeight = "bold";
+        }
+        if (Math.abs(l - minStretch) < 0.001 || Math.abs(l - maxStretch) < 0.001) {
+            row.style.backgroundColor = "#fff3e0";
         }
 
+        energyBody.appendChild(row);
+    }
+
     </script>
+
 </body>
 </html>
+
+
+

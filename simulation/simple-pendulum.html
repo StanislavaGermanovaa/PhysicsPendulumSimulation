@@ -16,9 +16,22 @@
     </script>
 </head>
 <body>
-    <div class="header">
-        <h1>Симулация на Математично Махало</h1>
-    </div>
+     <nav class="navbar">
+        <div class="navbar-left">
+            <a href="home.html">Начало</a>
+            <a href="pendulum7.html">7. клас</a>
+            <a href="pendulum9.html">9. клас</a>
+        </div>
+
+        <div class="navbar-center">
+            <h1>Симулация на Математично Махало</h1>
+        </div>
+
+        <div class="navbar-right">
+            <a href="spring-pendulum.html">Пружинно махало</a>
+        </div>
+    </nav>
+
     <div class="simulation-container">
         <div class="controls-panel">
             <div class="controls-content">
@@ -70,7 +83,7 @@
                             <button id="reset-btn">Нулиране</button>
                         </div>
                         <button id="view-results-btn">Резултати</button>
-                        <button id="spring-btn" onclick="location.href='spring-pendulum.html'">Пружинно махало</button>
+                        <!-- <button id="spring-btn" onclick="location.href='spring-pendulum.html'">Пружинно махало</button> -->
                     </div>
                 </div>
             </div>
@@ -100,7 +113,7 @@
                 <canvas id="energyChart" width="300" height="240"></canvas>
             </div>
         </div>
-    <script type="module" src="index.js"></script>
+    <script type="module" src="simple-pendulum.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>

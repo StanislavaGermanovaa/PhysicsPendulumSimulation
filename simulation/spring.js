@@ -59,13 +59,14 @@ massInput.addEventListener("input", (event) => {
     updateSphereSize(value);
 });
 
-function updateStringLength(length) {
+const equilibriumLength = 0.4;
+
+function updateStringLength(amplitude) {
     if (spring && sphere) {
-
-        spring.scale.z = length;
-
-        sphere.position.y = length*(-6);
-       
+        
+        const currentLength = equilibriumLength + amplitude;
+        spring.scale.z = currentLength;
+        sphere.position.y = -6 * currentLength;
     }
 }
 
@@ -167,10 +168,13 @@ resetBtn.addEventListener("click", () => {
     time = 0;
     cancelAnimationFrame(animationId);
 
-    let length = parseFloat(lengthSlider.value);
-    
-    if (spring) spring.scale.z = length;
-    if (sphere) sphere.position.y = -6 * length;
+    lengthSlider.value = 0;
+    lengthInput.value = 0;
+
+    const currentLength = equilibriumLength;
+
+    if (spring) spring.scale.z = currentLength;
+    if (sphere) sphere.position.y = -6 * currentLength;
 
     chartData.labels = [];
     chartData.datasets[0].data = [];
@@ -179,9 +183,6 @@ resetBtn.addEventListener("click", () => {
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
 });
-
-
-
 
 const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
@@ -296,10 +297,14 @@ function animate() {
 
             const timeNow = performance.now() / 1000;
 
-            const omega = Math.sqrt(k / mass);
-            const amplitude = 0.1; 
-            const x = amplitude * Math.sin(omega * timeNow);
-            const currentLength = lengthEquilibrium + x;
+           const amplitude = parseFloat(lengthSlider.value);
+const omega = Math.sqrt(k / mass);
+const x = amplitude * Math.sin(omega * timeNow);
+const currentLength = equilibriumLength + x;
+
+spring.scale.z = currentLength;
+sphere.position.y = -6 * currentLength;
+
 
             spring.scale.z = currentLength;
             sphere.position.y = -6 * currentLength;

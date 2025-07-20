@@ -147,7 +147,7 @@ html, body {
 
 .controls-section h2 {
   margin-bottom: 15px;
-  font-size: 18px;
+  font-size: 22px;
   color: #2c3e50;
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
@@ -155,8 +155,8 @@ html, body {
 
 .control-group label {
   display: block;
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin-bottom: 15px;
+  font-size: 15px;
   color: #555;
 }
 
@@ -401,3 +401,33 @@ html, body {
   border: 1px solid #eee;
   border-radius: 6px;
 }
+
+#grade-select {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ffffff;
+  color: #2c3e50;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+#grade-select:hover {
+  background-color: #f0f0f0;
+}
+
+#grade-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 196, 196, 0.4);
+}
+
+label[for="grade-select"] {
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  margin-right: 8px;
+}
+

@@ -19,8 +19,11 @@
     <nav class="navbar">
         <div class="navbar-left">
             <a href="home.html">Начало</a>
-            <a href="pendulum7.html">7. клас</a>
-            <a href="pendulum9.html">9. клас</a>
+            <label for="grade-select">Избери клас:</label>
+            <select id="grade-select">
+                <option value="7">7. клас</option>
+                <option value="9">9. клас</option>
+            </select>
         </div>
 
         <div class="navbar-center">
@@ -37,7 +40,7 @@
                 <div class="controls-section">
                     <h2>Параметри на пружинното махало</h2>
 
-                    <div class="control-group">
+                    <div class="control-group grade-7-only">
                         <label for="mass-slider">Маса на топчето (kg):
                             <span class="info-tooltip">?
                                 <span class="tooltip-text">Масата влияе на периода на трептене. По-голяма маса води до по-бавно движение.</span>
@@ -82,7 +85,7 @@
                             <button id="pause-btn">Пауза</button>
                             <button id="reset-btn">Нулиране</button>
                         </div>
-                        <button id="view-results-btn">Резултатите</button>
+                        <button id="view-results-btn" class="grade-9-only" >Резултатите</button>
                         <!-- <button id="math-btn" onclick="location.href='index.html'">Математично махало</button> -->
                     </div>
                 </div>
@@ -97,7 +100,7 @@
             <div class="graph-content">
                 <h2>Графика на преместване</h2>
                 <canvas id="chart" width="400" height="200"></canvas>
-                <div class="diagram-header">
+                <div class="diagram-header grade-9-only" >
                     <h2>
                         Диаграма на енергиите и периода на трептене: 
                         <span class="info-tooltip">?
@@ -111,13 +114,17 @@
                         </span>
                     </h2>
                 </div>
-                <canvas id="energyChart" width="300" height="240"></canvas>
+                <canvas id="energyChart" width="300" height="240" class="grade-9-only"></canvas>
             </div>
         </div>
     </div>
     
     <script type="module" src="spring.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initGradeUI } from './grade-ui.js';
+        initGradeUI();
+    </script>
 </body>
 </html>
 

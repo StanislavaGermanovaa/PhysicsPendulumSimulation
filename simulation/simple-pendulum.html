@@ -19,8 +19,12 @@
      <nav class="navbar">
         <div class="navbar-left">
             <a href="home.html">Начало</a>
-            <a href="pendulum7.html">7. клас</a>
-            <a href="pendulum9.html">9. клас</a>
+            <label for="grade-select">Избери клас:</label>
+            <select id="grade-select">
+                <option value="7">7. клас</option>
+                <option value="9">9. клас</option>
+            </select>
+
         </div>
 
         <div class="navbar-center">
@@ -37,17 +41,17 @@
             <div class="controls-content">
                 <div class="controls-section">
                     <h2>Параметри на махалото</h2>
-                    <div class="control-group">
-                         <label for="mass-slider">
-                            Маса на топчето (kg):
-                            <span class="info-tooltip">?
-                                <span class="tooltip-text">Определя инерцията на махалото. При по-голяма маса се увеличава кинетичната и потенциалната енергия.</span>
-                            </span>
-                        </label>
-                        <div class="slider-container">
-                            <input type="range" id="mass-slider" min="0.01" max="1" step="0.01" value="1">
-                            <input type="number" id="mass-input" min="0.01" max="1" step="0.01" value="1" class="value-input">
-                        </div>
+                    <div class="control-group grade-7-only">
+                            <label for="mass-slider">
+                                Маса на топчето (kg):
+                                <span class="info-tooltip">?
+                                    <span class="tooltip-text">Определя инерцията на махалото. При по-голяма маса се увеличава кинетичната и потенциалната енергия.</span>
+                                </span>
+                            </label>
+                            <div class="slider-container">
+                                <input type="range" id="mass-slider" min="0.01" max="1" step="0.01" value="1">
+                                <input type="number" id="mass-input" min="0.01" max="1" step="0.01" value="1" class="value-input">
+                            </div>
                     </div>
                     <div class="control-group">
                         <label for="length-slider">
@@ -82,7 +86,7 @@
                             <button id="pause-btn">Пауза</button>
                             <button id="reset-btn">Нулиране</button>
                         </div>
-                        <button id="view-results-btn">Резултати</button>
+                        <button id="view-results-btn" class="grade-9-only">Резултати</button>
                         <!-- <button id="spring-btn" onclick="location.href='spring-pendulum.html'">Пружинно махало</button> -->
                     </div>
                 </div>
@@ -96,7 +100,7 @@
             <div class="graph-content">
                 <h2>Графика на трептенията</h2>
                 <canvas id="chart" width="400" height="200"></canvas>                    
-                <div class="diagram-header">
+                <div class="diagram-header grade-9-only">
                     <h2>
                         Диаграма на енергиите и периода на трептене: 
                         <span class="info-tooltip">?
@@ -110,11 +114,15 @@
                         </span>
                     </h2>
                 </div>
-                <canvas id="energyChart" width="300" height="240"></canvas>
+                <canvas id="energyChart" width="300" height="240" class="grade-9-only" ></canvas>
             </div>
         </div>
     <script type="module" src="simple-pendulum.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initGradeUI } from './grade-ui.js';
+        initGradeUI();
+    </script>
 
 </body>
 </html>

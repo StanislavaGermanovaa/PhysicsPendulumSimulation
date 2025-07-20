@@ -153,6 +153,8 @@ resetBtn.addEventListener("click", () => {
     pauseTime = 0;
     theta = 0;
     omegaSim = 0;
+    startTime = null;
+    lastChartUpdateSecond = -1;
     syncAngleInputs(0);
 
     if (empty) empty.rotation.x = 0;
@@ -173,47 +175,117 @@ resetBtn.addEventListener("click", () => {
 });
 
 
+const zeroLinePlugin = {
+  id: 'zeroLinePlugin',
+  afterDraw(chart) {
+    const {ctx, chartArea: {left, right, top, bottom}, scales: {y}} = chart;
+    const yZero = y.getPixelForValue(0);
+
+    if (yZero < top || yZero > bottom) {
+      return;
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'black';
+    ctx.moveTo(left, yZero);
+    ctx.lineTo(right, yZero);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
 const chartCtx = document.getElementById("chart").getContext("2d");
+
 const chartData = {
     labels: [],
     datasets: [{
-        label: 'Графиката на хармонично трептене',
+        label: 'Хармонично трептене',
         data: [],
-        borderColor: 'rgba(75, 192, 192, 1)',
+        borderColor: 'lightblue',
+        borderWidth: 2,
+        pointStyle: 'cross',
+        pointRadius: [],
+        pointBackgroundColor: 'red',
         fill: false,
-        tension: 0.1
+        tension: 0.3
     }]
 };
+
 const angleChart = new Chart(chartCtx, {
     type: 'line',
     data: chartData,
-   options: {
-    responsive: true,
-    scales: {
-        x: {
-            display: false,
-        },
-        y: {
-            min: -90,
-            max: 90,
-            title: { display: true, text: 'Ъгъл (°)' }
-        }
-    },
-    plugins: {
-        tooltip: {
-            callbacks: {
-                title: function(context) {
-                    return 'Време (s): ' + context[0].label;
+    options: {
+        responsive: true,
+        animation: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Време (s)'
                 },
-                label: function(context) {
-                    return 'Ъгъл (°): ' + context.parsed.y.toFixed(2) + '°';
+                ticks: {
+                    stepSize: 1,          
+                    callback: function (value) {
+                        if (Number.isInteger(value)) {
+                            return `${value} s`;
+                        }
+                        return '';
+                    }
+                },
+                grid: {
+                    color: '#dddddd'
+                }
+            },
+            y: {
+                beginAtZero: false,
+                suggestedMin: -10,
+                suggestedMax: 10,
+                title: {
+                    display: true,
+                    text: 'Амплитуда (см)'
+                },
+                ticks: {
+                    callback: function (value) {
+                        return `${value} см`;
+                    }
+                },
+                grid: {
+                    color: '#dddddd'
+                },
+                afterDataLimits: (scale) => {
+                    const allValues = scale.chart.data.datasets[0].data.map(Number);
+                    const max = Math.max(...allValues);
+                    const min = Math.min(...allValues);
+                    const buffer = 5;
+                    scale.max = Math.ceil(max + buffer);
+                    scale.min = Math.floor(min - buffer);
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    title: function (context) {
+                        return `Време: ${context[0].label} s`;
+                    },
+                    label: function (context) {
+                        return `Амплитуда: ${context.parsed.y} см`;
+                    }
                 }
             }
         }
-    }
-}
-
+    },
+    plugins: [zeroLinePlugin]
 });
+
+
+
 
 function updatePeriodDisplay() {
     const length = parseFloat(lengthInput.value);
@@ -284,15 +356,16 @@ const energyChart = new Chart(energyChartCtx, {
 
 let lastChartUpdateSecond = -1;
 
+
 function animate() {
     requestAnimationFrame(animate);
 
     if (root) {
-       // root.rotation.y += 0.005;
-
         if (isAnimating && empty) {
-            const length = parseFloat(lengthInput.value);
-            const mass = parseFloat(massInput.value);
+            const length = parseFloat(lengthInput.value);       
+            const mass = parseFloat(massInput.value);         
+            const initialAngleDeg = parseFloat(angleInput.value); 
+            const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
             const alpha = -(g / length) * Math.sin(theta);
             omegaSim += alpha * dt;
@@ -302,10 +375,8 @@ function animate() {
 
             const height = length * (1 - Math.cos(theta));
             const potentialEnergy = mass * g * height;
-
             const linearVelocity = length * omegaSim;
-            const kineticEnergy = 0.5 * mass * linearVelocity * linearVelocity;
-
+            const kineticEnergy = 0.5 * mass * linearVelocity ** 2;
             const totalEnergy = potentialEnergy + kineticEnergy;
 
             const potEl = document.getElementById("potential-energy");
@@ -317,37 +388,41 @@ function animate() {
             if (totalEl) totalEl.textContent = totalEnergy.toFixed(2);
 
             energyChart.data.datasets[0].data[0] = potentialEnergy;
-            energyChart.data.datasets[0].data[0] = potentialEnergy;
             energyChart.data.datasets[0].data[1] = kineticEnergy;
             energyChart.data.datasets[0].data[2] = totalEnergy;
 
-            // изчисление на периода (ако се променя в реално време)
             const period = 2 * Math.PI * Math.sqrt(length / g);
             energyChart.data.datasets[0].data[3] = period;
-
             energyChart.update('none');
 
-            const currentAngleDeg = theta * (180 / Math.PI);
-
-           if (time - lastChartUpdateSecond >= 0.1) {
-            chartData.labels.push(time.toFixed(2));
-            chartData.datasets[0].data.push(currentAngleDeg.toFixed(2));
-
-            if (chartData.labels.length > 50) {
-                chartData.labels.shift();
-                chartData.datasets[0].data.shift();
-            }
-            angleChart.update('none');
-            lastChartUpdateSecond = time;
-        }
             const now = performance.now() / 1000;
             time = now - startTime;
+
+            const omega = 2 * Math.PI / period;
+            const amplitudeMeters = length * Math.sin(initialAngleRad); 
+            const amplitudeCm = amplitudeMeters * 100;
+            const displacementCm = amplitudeCm * Math.cos(omega * time);
+
+            if (time - lastChartUpdateSecond >= 0.1) {
+                chartData.labels.push(time.toFixed(2));
+                chartData.datasets[0].data.push(displacementCm.toFixed(2));
+
+                if (chartData.labels.length > 50) {
+                    chartData.labels.shift();
+                    chartData.datasets[0].data.shift();
+                }
+
+                angleChart.update('none');
+                lastChartUpdateSecond = time;
+            }
         }
     }
 
     controls.update();
     renderer.render(scene, camera);
 }
+
+
 
 document.getElementById("view-results-btn").addEventListener("click", () => {
     const length = parseFloat(lengthInput.value);

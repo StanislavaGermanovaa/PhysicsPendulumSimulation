@@ -1,9 +1,12 @@
-
-
 export function initGradeUI() {
   const gradeSelect = document.getElementById("grade-select");
   const massSlider = document.getElementById("mass-slider");
   const massInput = document.getElementById("mass-input");
+
+  function getGradeFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('grade') || '7'; // по подразбиране 7
+  }
 
   function applyGradeSettings(grade) {
     const isGrade7 = grade === '7';
@@ -28,6 +31,7 @@ export function initGradeUI() {
       }
     }
 
+    gradeSelect.value = grade;
     window.currentGrade = grade;
   }
 
@@ -36,6 +40,7 @@ export function initGradeUI() {
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    applyGradeSettings(gradeSelect.value);
+    const grade = getGradeFromURL();
+    applyGradeSettings(grade);
   });
 }

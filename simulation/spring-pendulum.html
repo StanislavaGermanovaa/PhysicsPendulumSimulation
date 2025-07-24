@@ -64,7 +64,7 @@
                         </div>
                     </div>
 
-                     <div class="control-group grade-9-only">
+                     <div class="control-group">
                         <label for="k-slider">Пружинна константа k (N/m):
                             <span class="info-tooltip">?
                                 <span class="tooltip-text">Пружинната константа показва колко е твърда пружината. По-висока стойност означава по-малко удължение при същата сила и по-бързи трептения.</span>
@@ -99,22 +99,31 @@
         <div class="graph-container">
             <div class="graph-content">
                 <h2>Графика на преместване</h2>
-                <canvas id="chart" width="400" height="200"></canvas>
+                <canvas id="chart" width="400" height="400"></canvas>
+                <hr style="border: none; border-top: 2px solid #888; margin: 16px auto; width: 100%;">
+                <div id="period-display" style=" font-size: 1.2em; margin-bottom: 12px; color: #000; font-weight: 500;">
+                    Период: <span id="period-value">0.00</span> s
+                    <span class="info-tooltip">?
+                        <span class="tooltip-text">
+                            Периодът е времето за едно пълно трептене.<br>
+                            <strong>Формула:</strong> T = 2π√(m/k)
+                        </span>
+                    </span>
+                </div>
                 <div class="diagram-header grade-9-only" >
                     <h2>
-                        Диаграма на енергиите и периода на трептене: 
+                        Диаграма на енергиите: 
                         <span class="info-tooltip">?
                             <span class="tooltip-text">
                                 Диаграмата показва енергийното състояние на пружинното махало:
                                 <br><strong>Потенциална енергия:</strong> E = mgh
                                 <br><strong>Кинетична енергия:</strong> E = ½mv²
                                 <br><strong>Обща енергия:</strong> E = Ek + Ep
-                                <br><strong>Период:</strong> T = 2π√(m/k)
                             </span>
                         </span>
                     </h2>
                 </div>
-                <canvas id="energyChart" width="300" height="240" class="grade-9-only"></canvas>
+                <canvas id="energyChart" width="300" height="380" class="grade-9-only"></canvas>
             </div>
         </div>
     </div>

@@ -128,6 +128,7 @@ let theta = 0;
 let omegaSim = 0;
 const dt = 1 / 60;
 
+
 const startBtn = document.getElementById("start-btn");
 startBtn.addEventListener("click", () => {
     if (!isAnimating) {
@@ -285,8 +286,6 @@ const angleChart = new Chart(chartCtx, {
 });
 
 
-
-
 function updatePeriodDisplay() {
     const length = parseFloat(lengthInput.value);
     const period = 2 * Math.PI * Math.sqrt(length / g);
@@ -294,19 +293,15 @@ function updatePeriodDisplay() {
 }
 
 
-
-
-
-
 const energyChartCtx = document.getElementById("energyChart").getContext("2d");
 
 const energyChart = new Chart(energyChartCtx, {
     type: 'bar',
     data: {
-        labels: ['Потенциална', 'Кинетична', 'Обща', 'Период'],
+        labels: ['Потенциална', 'Кинетична', 'Обща'],
         datasets: [{
             label: 'Енергии и период',
-            data: [0, 0, 0, 0],
+            data: [0, 0, 0],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.6)',
                 'rgba(54, 162, 235, 0.6)',

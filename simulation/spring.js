@@ -235,10 +235,10 @@ const energyChartCtx = document.getElementById("energyChart").getContext("2d");
 const energyChart = new Chart(energyChartCtx, {
     type: 'bar',
     data: {
-        labels: ['Потенциална', 'Кинетична', 'Обща', 'Период'],
+        labels: ['Потенциална', 'Кинетична', 'Обща'],
         datasets: [{
             label: 'Енергии и период',
-            data: [0, 0, 0, 0],
+            data: [0, 0, 0],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.6)',
                 'rgba(54, 162, 235, 0.6)',
@@ -254,33 +254,38 @@ const energyChart = new Chart(energyChartCtx, {
             borderWidth: 1
         }]
     },
-    options: {
-        responsive: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Стойност'
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                display: false 
+   options: {
+    responsive: false,
+    scales: {
+        y: {
+            beginAtZero: true,
+            max: 1,
+            ticks: {
+                stepSize: 0.1
             },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const index = context.dataIndex;
-                        const value = context.parsed.y.toFixed(2);
-                        const units = [' J', ' J', ' J', ' s']; 
-                        return `${context.label}: ${value}${units[index]}`;
-                    }
+            title: {
+                display: true,
+                text: 'Стойност (J)'
+            }
+        }
+    },
+    plugins: {
+        legend: {
+            display: false 
+        },
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    const index = context.dataIndex;
+                    const value = context.parsed.y.toFixed(2);
+                    const units = [' J', ' J', ' J']; 
+                    return `${context.label}: ${value}${units[index]}`;
                 }
             }
         }
     }
+}
+
 });
 
 
@@ -316,6 +321,8 @@ sphere.position.y = -6 * currentLength;
             const totalEnergy = potentialEnergy + kineticEnergy;
 
             const period = 2 * Math.PI * Math.sqrt(mass / k);
+            document.getElementById("period-value").textContent = period.toFixed(2);
+
 
             energyChart.data.datasets[0].data = [
                 potentialEnergy,

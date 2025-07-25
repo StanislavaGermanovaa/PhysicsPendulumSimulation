@@ -32,9 +32,9 @@ if (timeLabels.length > 1) {
 
 const totalEnergy = mass * g * length * (1 - Math.cos(maxAngle * Math.PI / 180));
 
-let maxKE = -Infinity;
+const maxKE = mass * g * length * (1 - Math.cos(initialAngle * Math.PI / 180));
 let minKE = Infinity;
-let maxPE = -Infinity;
+const maxPE = mass * g * length * (1 - Math.cos(initialAngle * Math.PI / 180));
 let minPE = Infinity;
 
 for (let i = 0; i < timeLabels.length; i++) {
@@ -53,9 +53,7 @@ for (let i = 0; i < timeLabels.length; i++) {
   const potentialEnergy = mass * g * height;
   const kineticEnergy = 0.5 * mass * v * v;
 
-  if (kineticEnergy > maxKE) maxKE = kineticEnergy;
   if (kineticEnergy < minKE) minKE = kineticEnergy;
-  if (potentialEnergy > maxPE) maxPE = potentialEnergy;
   if (potentialEnergy < minPE) minPE = potentialEnergy;
 }
 

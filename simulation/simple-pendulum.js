@@ -363,8 +363,11 @@ function animate() {
             const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
             const alpha = -(g / length) * Math.sin(theta);
-            omegaSim += alpha * dt;
-            theta += omegaSim * dt;
+            const omegaHalfStep = omegaSim + (alpha * dt) / 2;
+            theta += omegaHalfStep * dt;
+            const newAlpha = -(g / length) * Math.sin(theta);
+            omegaSim = omegaHalfStep + (newAlpha * dt) / 2;
+
 
             empty.rotation.x = theta;
 
@@ -393,10 +396,8 @@ function animate() {
             const now = performance.now() / 1000;
             time = now - startTime;
 
-            const omega = 2 * Math.PI / period;
-            const amplitudeMeters = length * Math.sin(initialAngleRad); 
-            const amplitudeCm = amplitudeMeters * 100;
-            const displacementCm = amplitudeCm * Math.cos(omega * time);
+            const displacementCm = length * Math.sin(theta) * 100;
+
 
             if (time - lastChartUpdateSecond >= 0.1) {
                 chartData.labels.push(time.toFixed(2));
@@ -416,7 +417,6 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
 }
-
 
 
 document.getElementById("view-results-btn").addEventListener("click", () => {

@@ -131,7 +131,6 @@ html, body {
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   z-index: 2;
-  overflow: hidden;
 }
 
 .controls-content {
@@ -345,22 +344,26 @@ html, body {
 }
 
 .tooltip-text {
-  visibility: hidden;
-  width: 220px;
-  background-color: #333;
-  color: #fff;
-  text-align: left;
-  border-radius: 6px;
-  padding: 8px;
+  font-size: 13px;
   position: absolute;
-  z-index: 1;
-  bottom: 125%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  width: 240px;
+  white-space: normal;
+  word-wrap: break-word;
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
   opacity: 0;
+  visibility: hidden;
   transition: opacity 0.3s;
-  font-size: 13px;
+  z-index: 9999;
+  pointer-events: none;
 }
+
+
 
 .info-tooltip:hover .tooltip-text {
   visibility: visible;
@@ -378,7 +381,6 @@ html, body {
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   z-index: 3;
-  overflow: hidden;
 }
 
 .graph-content {

@@ -127,14 +127,24 @@ let startTime = null;
 let theta = 0;
 let omegaSim = 0;
 const dt = 1 / 60;
+let startFromEquilibrium = true;
 
 
 const startBtn = document.getElementById("start-btn");
 startBtn.addEventListener("click", () => {
     if (!isAnimating) {
         isAnimating = true;
-        theta = parseFloat(angleInput.value) * Math.PI / 180;
-        omegaSim = 0;
+        const initialAngleDeg = parseFloat(angleInput.value);
+        const initialAngleRad = initialAngleDeg * Math.PI / 180;
+
+        if (startFromEquilibrium) {
+            theta = 0;
+            omegaSim = Math.sqrt(g / parseFloat(lengthInput.value)) * initialAngleRad; 
+        } else {
+            theta = initialAngleRad;
+            omegaSim = 0;
+        }
+
         startTime = performance.now() / 1000 - pauseTime;
     }
 });
@@ -227,11 +237,7 @@ const angleChart = new Chart(chartCtx, {
                     text: 'Време (s)'
                 },
                 ticks: {
-                    stepSize: 1,          
-                    callback: function (value) {
-                        if (Number.isInteger(value)) {
-                            return `${value} s`;
-                        }
+                    callback: function () {
                         return '';
                     }
                 },
@@ -362,14 +368,10 @@ function animate() {
             const initialAngleDeg = parseFloat(angleInput.value); 
             const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
-            const alpha = -(g / length) * Math.sin(theta);
-            const omegaHalfStep = omegaSim + (alpha * dt) / 2;
-            theta += omegaHalfStep * dt;
-            const newAlpha = -(g / length) * Math.sin(theta);
-            omegaSim = omegaHalfStep + (newAlpha * dt) / 2;
-
-
+            const omega = Math.sqrt(g / length);
+           theta = initialAngleRad * Math.sin(omega * time);
             empty.rotation.x = theta;
+
 
             const height = length * (1 - Math.cos(theta));
             const potentialEnergy = mass * g * height;

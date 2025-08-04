@@ -4,30 +4,20 @@ import { OrbitControls } from 'OrbitControls';
 
 const canvas = document.querySelector('.webgl');
 const scene = new THREE.Scene();
-
-const textureLoader = new THREE.TextureLoader();
-scene.background = textureLoader.load('assets/background.jpg');
+scene.background = new THREE.TextureLoader().load('assets/background.jpg');
 
 const loader = new GLTFLoader();
-let root = null;
-let sphere = null;
-let cylinder = null;
-let empty = null;
+let root = null, sphere = null, cylinder = null, empty = null;
 
 loader.load('assets/pendulum.glb', (glb) => {
     root = glb.scene;
     root.scale.set(0.45, 0.45, 0.45);
     root.position.y = -0.7;
     scene.add(root);
-
     sphere = root.getObjectByName("Sphere");
     cylinder = root.getObjectByName("Cylinder004");
     empty = root.getObjectByName("Pivot_Cylinder");
-}, (xhr) => {
-    console.log(`${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
-}, () => {
-    console.log("An error occurred");
-});
+}, undefined, () => console.log("An error occurred"));
 
 function updateSphereSize(value) {
     if (!sphere) return;
@@ -52,7 +42,7 @@ massInput.addEventListener("input", (e) => {
 function updateStringLength(length) {
     if (!cylinder || !sphere) return;
     const originalScaleY = cylinder.scale.y;
-    cylinder.scale.y = -length; // обратен знак, както в оригинала
+    cylinder.scale.y = -length;
     sphere.position.y = originalScaleY + cylinder.scale.y - sphere.scale.y / 2;
 }
 
@@ -72,8 +62,7 @@ lengthInput.addEventListener("input", (e) => {
     updatePeriodDisplay();
 });
 
-let angle = 0;
-let angleRad = 0;
+let angle = 0, angleRad = 0;
 
 const angleSlider = document.getElementById("angle-slider");
 const angleInput = document.getElementById("angle-input");
@@ -119,16 +108,11 @@ controls.dampingFactor = 0.25;
 controls.enableZoom = false;
 
 let isAnimating = false;
-let time = 0;
-const g = 9.81;
-let pauseTime = 0;
-let startTime = null;
-
-let theta = 0;
-let omegaSim = 0;
-const dt = 1 / 60;
+let time = 0, pauseTime = 0, startTime = null;
+let theta = 0, omegaSim = 0;
+const g = 9.81, dt = 1 / 60;
 let startFromEquilibrium = true;
-
+let constantTotalEnergy = null;
 
 const startBtn = document.getElementById("start-btn");
 startBtn.addEventListener("click", () => {
@@ -140,6 +124,11 @@ startBtn.addEventListener("click", () => {
         if (startFromEquilibrium) {
             theta = 0;
             omegaSim = Math.sqrt(g / parseFloat(lengthInput.value)) * initialAngleRad; 
+            const length = parseFloat(lengthInput.value);
+            const mass = parseFloat(massInput.value);
+            const height0 = length * (1 - Math.cos(initialAngleRad));
+            constantTotalEnergy = mass * g * height0;
+
         } else {
             theta = initialAngleRad;
             omegaSim = 0;
@@ -165,6 +154,8 @@ resetBtn.addEventListener("click", () => {
     theta = 0;
     omegaSim = 0;
     startTime = null;
+    constantTotalEnergy = null;
+
     lastChartUpdateSecond = -1;
     syncAngleInputs(0);
 
@@ -353,8 +344,6 @@ const energyChart = new Chart(energyChartCtx, {
 });
 
 
-
-
 let lastChartUpdateSecond = -1;
 
 
@@ -368,16 +357,16 @@ function animate() {
             const initialAngleDeg = parseFloat(angleInput.value); 
             const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
-            const omega = Math.sqrt(g / length);
-           theta = initialAngleRad * Math.sin(omega * time);
-            empty.rotation.x = theta;
+           const omega = Math.sqrt(g / length);
 
+            theta = initialAngleRad * Math.cos(omega * time);
+
+            empty.rotation.x = theta;
 
             const height = length * (1 - Math.cos(theta));
             const potentialEnergy = mass * g * height;
-            const linearVelocity = length * omegaSim;
-            const kineticEnergy = 0.5 * mass * linearVelocity ** 2;
-            const totalEnergy = potentialEnergy + kineticEnergy;
+            const totalEnergy = constantTotalEnergy !== null ? constantTotalEnergy : potentialEnergy + kineticEnergy;
+            const kineticEnergy = Math.max(0, totalEnergy - potentialEnergy);
 
             const potEl = document.getElementById("potential-energy");
             const kinEl = document.getElementById("kinetic-energy");

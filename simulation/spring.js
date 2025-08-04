@@ -153,9 +153,8 @@ const pauseBtn = document.getElementById("pause-btn");
 const resetBtn = document.getElementById("reset-btn");
 
 startBtn.addEventListener("click", () => {
-    if (!isAnimating) {
-        isAnimating = true;
-    }
+    isAnimating = true;
+    simulationStartTime = performance.now() / 1000;
 });
 
 pauseBtn.addEventListener("click", () => {
@@ -184,15 +183,37 @@ resetBtn.addEventListener("click", () => {
     energyChart.update();
 });
 
+const zeroLinePlugin = {
+    id: 'zeroLinePlugin',
+    afterDraw(chart) {
+        const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
+        const yZero = y.getPixelForValue(0);
+        if (yZero < top || yZero > bottom) return;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'black';
+        ctx.moveTo(left, yZero);
+        ctx.lineTo(right, yZero);
+        ctx.stroke();
+        ctx.restore();
+    }
+};
+
 const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
     labels: [],
     datasets: [{
-        label: "Преместване",
+        label: "Хармонично трептене (пружина)",
         data: [],
-        borderColor: 'rgba(75, 192, 192, 1)',
+        borderColor: 'lightblue',
+        borderWidth: 2,
+        pointStyle: 'cross',
+        pointRadius: [],
+        pointBackgroundColor: 'red',
         fill: false,
-        tension: 0.1
+        tension: 0.3
     }]
 };
 
@@ -201,33 +222,62 @@ const chart = new Chart(chartCtx, {
     data: chartData,
     options: {
         responsive: true,
+        animation: false,
         scales: {
             x: {
-                display: false
+                title: {
+                    display: true,
+                    text: 'Време (s)'
+                },
+                ticks: {
+                    callback: function () {
+                        return '';
+                    }
+                },
+                grid: {
+                    color: '#dddddd'
+                }
             },
             y: {
-                title: { display: true, text: 'Позиция (m)' },
-                min: -1,
-                max: 1
+                beginAtZero: false,
+                suggestedMin: -0.5,
+                suggestedMax: 0.5,
+                title: {
+                    display: true,
+                    text: 'Отклонение (м)'
+                },
+                ticks: {
+                    stepSize: 0.1,
+                    callback: function (value) {
+                        return `${value} м`;
+                    }
+                },
+                grid: {
+                    color: '#dddddd'
+                }
+
             }
         },
         plugins: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            },
             tooltip: {
                 callbacks: {
-                    title: function(tooltipItems) {
-                        return "Време: " + tooltipItems[0].label + " s";
+                    title: function (context) {
+                        return `Време: ${context[0].label} s`;
                     },
-                    label: function(tooltipItem) {
-                        return "Позиция: " + tooltipItem.formattedValue + " m";
+                    label: function (context) {
+                        return `Отклонение: ${context.parsed.y} м`;
                     }
                 }
-            },
-            legend: {
-                display: false
             }
         }
-    }
+    },
+    plugins: [zeroLinePlugin]
 });
+
 
 
 const energyChartCtx = document.getElementById("energyChart").getContext("2d");
@@ -302,13 +352,13 @@ function animate() {
 
             const timeNow = performance.now() / 1000;
 
-           const amplitude = parseFloat(lengthSlider.value);
-const omega = Math.sqrt(k / mass);
-const x = amplitude * Math.sin(omega * timeNow);
-const currentLength = equilibriumLength + x;
+            const amplitude = parseFloat(lengthSlider.value);
+            const omega = Math.sqrt(k / mass);
+            const x = amplitude * Math.sin(omega * timeNow);
+            const currentLength = equilibriumLength + x;
 
-spring.scale.z = currentLength;
-sphere.position.y = -6 * currentLength;
+            spring.scale.z = currentLength;
+            sphere.position.y = -6 * currentLength;
 
 
             spring.scale.z = currentLength;
@@ -336,7 +386,8 @@ sphere.position.y = -6 * currentLength;
             const now = timeNow;
             if (now - lastChartUpdateSecond >= 0.1) {
                 chartData.labels.push(now.toFixed(2));
-                chartData.datasets[0].data.push(x.toFixed(3));
+               // const displacementCm = x * 100; // for cm
+chartData.datasets[0].data.push(x.toFixed(2));
 
                 if (chartData.labels.length > 50) {
                     chartData.labels.shift();

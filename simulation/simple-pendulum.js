@@ -238,15 +238,16 @@ const angleChart = new Chart(chartCtx, {
             },
             y: {
                 beginAtZero: false,
-                suggestedMin: -10,
-                suggestedMax: 10,
+                suggestedMin: -0.5,
+                suggestedMax: 0.5,
                 title: {
                     display: true,
-                    text: 'Амплитуда (см)'
+                    text: 'Амплитуда (м)'
                 },
                 ticks: {
+                    stepSize: 0.1,
                     callback: function (value) {
-                        return `${value} см`;
+                        return `${value.toFixed(2)} м`;
                     }
                 },
                 grid: {
@@ -256,9 +257,9 @@ const angleChart = new Chart(chartCtx, {
                     const allValues = scale.chart.data.datasets[0].data.map(Number);
                     const max = Math.max(...allValues);
                     const min = Math.min(...allValues);
-                    const buffer = 5;
-                    scale.max = Math.ceil(max + buffer);
-                    scale.min = Math.floor(min - buffer);
+                    const buffer = 0.1;
+                    scale.max = Math.ceil((max + buffer) * 10) / 10;
+                    scale.min = Math.floor((min - buffer) * 10) / 10;
                 }
             }
         },
@@ -273,7 +274,7 @@ const angleChart = new Chart(chartCtx, {
                         return `Време: ${context[0].label} s`;
                     },
                     label: function (context) {
-                        return `Амплитуда: ${context.parsed.y} см`;
+                        return `Амплитуда: ${context.parsed.y.toFixed(3)} м`;
                     }
                 }
             }
@@ -359,7 +360,12 @@ function animate() {
 
            const omega = Math.sqrt(g / length);
 
-            theta = initialAngleRad * Math.cos(omega * time);
+           if (startFromEquilibrium) {
+                theta = initialAngleRad * Math.sin(omega * time);
+            } else {
+                theta = initialAngleRad * Math.cos(omega * time);
+            }
+
 
             empty.rotation.x = theta;
 
@@ -387,12 +393,13 @@ function animate() {
             const now = performance.now() / 1000;
             time = now - startTime;
 
-            const displacementCm = length * Math.sin(theta) * 100;
-
+            //const displacementCm = length * Math.sin(theta) * 100;
+            const displacementM = length * Math.sin(theta);
 
             if (time - lastChartUpdateSecond >= 0.1) {
                 chartData.labels.push(time.toFixed(2));
-                chartData.datasets[0].data.push(displacementCm.toFixed(2));
+                //chartData.datasets[0].data.push(displacementCm.toFixed(2));
+                chartData.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
 
                 if (chartData.labels.length > 50) {
                     chartData.labels.shift();

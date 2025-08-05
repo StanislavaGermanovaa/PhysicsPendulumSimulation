@@ -173,7 +173,7 @@ resetBtn.addEventListener("click", () => {
         if (el) el.textContent = "0.00";
     });
 
-    document.getElementById("period-value").textContent = "0.00";
+    updatePeriodDisplay();
 });
 
 
@@ -435,5 +435,6 @@ const data = {
     window.open('results/simple-pendulum.html', '_blank');
 });
 
+updatePeriodDisplay();
 animate();
 

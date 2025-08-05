@@ -5,35 +5,38 @@ export function initGradeUI() {
 
   function getGradeFromURL() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('grade') || '7'; // по подразбиране 7
+    return params.get('grade') || '7';
   }
 
   function applyGradeSettings(grade) {
-    const isGrade7 = grade === '7';
-    const isGrade9 = grade === '9';
+  const isGrade7 = grade === '7';
+  const isGrade9 = grade === '9';
 
-    document.querySelectorAll('.grade-7-only').forEach(el => {
-      el.style.display = isGrade7 ? 'block' : 'none';
-    });
-    document.querySelectorAll('.grade-9-only').forEach(el => {
-      el.style.display = isGrade9 ? 'block' : 'none';
-    });
+  document.querySelectorAll('.grade-7-only').forEach(el => {
+    el.style.display = isGrade7 ? 'block' : 'none';
+  });
+  document.querySelectorAll('.grade-9-only').forEach(el => {
+    el.style.display = isGrade9 ? 'block' : 'none';
+  });
 
-    if (massSlider && massInput) {
-      if (isGrade9) {
-        massSlider.value = 1;
-        massInput.value = 1;
-        massSlider.disabled = true;
-        massInput.disabled = true;
-      } else {
-        massSlider.disabled = false;
-        massInput.disabled = false;
-      }
+  const isSimplePendulum = window.location.pathname.includes("simple-pendulum");
+
+  if (massSlider && massInput) {
+    if (isGrade9 && isSimplePendulum) {
+      massSlider.value = 1;
+      massInput.value = 1;
+      massSlider.disabled = true;
+      massInput.disabled = true;
+    } else {
+      massSlider.disabled = false;
+      massInput.disabled = false;
     }
-
-    gradeSelect.value = grade;
-    window.currentGrade = grade;
   }
+
+  gradeSelect.value = grade;
+  window.currentGrade = grade;
+}
+
 
   gradeSelect.addEventListener("change", () => {
     applyGradeSettings(gradeSelect.value);

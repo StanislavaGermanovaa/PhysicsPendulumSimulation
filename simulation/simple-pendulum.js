@@ -227,9 +227,9 @@ const angleChart = new Chart(chartCtx, {
                     display: true,
                     text: 'Време (s)'
                 },
-                ticks: {
-                    callback: function () {
-                        return '';
+                 ticks: {
+                    callback: function (value, index, ticks) {
+                        return this.getLabelForValue(value);
                     }
                 },
                 grid: {

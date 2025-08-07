@@ -143,35 +143,48 @@ controls.enableZoom = false;
 
 let isAnimating = false;
 let time = 0;
-let animationId = null;
+let pauseTime = 0;
+let startTime = null;
+
 
 const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const resetBtn = document.getElementById("reset-btn");
 
-let simulationStartTime = null;
 
 startBtn.addEventListener("click", () => {
-    isAnimating = true;
-    simulationStartTime = performance.now() / 1000;
+    if (!isAnimating) {
+        isAnimating = true;
+        startTime = performance.now() / 1000 - pauseTime;
+
+        const initialAmplitude = parseFloat(lengthSlider.value);
+        chartData.labels.push("0.00");
+        chartData.datasets[0].data.push("0.00");
+
+        chart.update();
+
+        lastChartUpdateSecond = 0;
+    }
 });
 
 
 pauseBtn.addEventListener("click", () => {
-    isAnimating = false;
-    cancelAnimationFrame(animationId);
+    if (isAnimating) {
+        isAnimating = false;
+        pauseTime = time; 
+    }
 });
-
 resetBtn.addEventListener("click", () => {
     isAnimating = false;
     time = 0;
-    cancelAnimationFrame(animationId);
+    pauseTime = 0;
+    startTime = null;
+    lastChartUpdateSecond = 0; 
 
     lengthSlider.value = 0;
     lengthInput.value = 0;
 
     const currentLength = equilibriumLength;
-
     if (spring) spring.scale.z = currentLength;
     if (sphere) sphere.position.y = -6 * currentLength;
 
@@ -182,6 +195,8 @@ resetBtn.addEventListener("click", () => {
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
 });
+
+
 
 const zeroLinePlugin = {
     id: 'zeroLinePlugin',
@@ -230,10 +245,10 @@ const chart = new Chart(chartCtx, {
                     text: 'Време (s)'
                 },
                 ticks: {
-                    callback: function () {
-                        return '';
-                    }
-                },
+                callback: function (value, index, ticks) {
+                    return this.getLabelForValue(value);
+                }
+            },
                 grid: {
                     color: '#dddddd'
                 }
@@ -344,67 +359,58 @@ let lastChartUpdateSecond = 0;
 function animate() {
     requestAnimationFrame(animate);
 
-    if (root) {
-        if (isAnimating && sphere && spring && empty) {
-            const lengthEquilibrium = parseFloat(lengthSlider.value); 
-            const mass = parseFloat(massSlider.value);
-            const k = springConstant;
+    const now = performance.now() / 1000;
 
-            const timeNow = performance.now() / 1000;
-            const elapsedTime = timeNow - simulationStartTime;
-            const amplitude = parseFloat(lengthSlider.value);
-            const omega = Math.sqrt(k / mass);
-            const x = amplitude * Math.sin(omega * elapsedTime);
-            const currentLength = equilibriumLength + x;
+    if (isAnimating && startTime !== null) {
+        time = now - startTime;
+    }
 
-            spring.scale.z = currentLength;
-            sphere.position.y = -6 * currentLength;
+    if (root && isAnimating && sphere && spring && empty) {
+        const mass = parseFloat(massSlider.value);
+        const k = springConstant;
+        const amplitude = parseFloat(lengthSlider.value);
 
+        const omega = Math.sqrt(k / mass);
+        const x = amplitude * Math.sin(omega * time); 
+        const velocity = amplitude * omega * Math.cos(omega * time);
 
-            spring.scale.z = currentLength;
-            sphere.position.y = -6 * currentLength;
+        const currentLength = equilibriumLength + x;
 
-            const velocity = amplitude * omega * Math.cos(omega * timeNow);
+        spring.scale.z = currentLength;
+        sphere.position.y = -6 * currentLength;
 
-            const potentialEnergy = 0.5 * k * x * x;
-            const kineticEnergy = 0.5 * mass * velocity * velocity;
-            const totalEnergy = potentialEnergy + kineticEnergy;
+        const potentialEnergy = 0.5 * k * x * x;
+        const kineticEnergy = 0.5 * mass * velocity * velocity;
+        const totalEnergy = potentialEnergy + kineticEnergy;
 
-            const period = 2 * Math.PI * Math.sqrt(mass / k);
-            document.getElementById("period-value").textContent = period.toFixed(2);
+        const period = 2 * Math.PI * Math.sqrt(mass / k);
+        document.getElementById("period-value").textContent = period.toFixed(2);
 
+        energyChart.data.datasets[0].data = [
+            potentialEnergy,
+            kineticEnergy,
+            totalEnergy,
+            period
+        ];
+        energyChart.update('none');
 
-            energyChart.data.datasets[0].data = [
-                potentialEnergy,
-                kineticEnergy,
-                totalEnergy,
-                period
-            ];
-            energyChart.update('none');
+        if (time - lastChartUpdateSecond >= 0.1) {
+            chartData.labels.push(time.toFixed(2));
+            chartData.datasets[0].data.push(x.toFixed(2));
 
-
-            const now = timeNow;
-            if (now - lastChartUpdateSecond >= 0.1) {
-                chartData.labels.push(now.toFixed(2));
-               // const displacementCm = x * 100; // for cm
-chartData.datasets[0].data.push(x.toFixed(2));
-
-                if (chartData.labels.length > 50) {
-                    chartData.labels.shift();
-                    chartData.datasets[0].data.shift();
-                }
-
-                chart.update('none');
-                lastChartUpdateSecond = now;
+            if (chartData.labels.length > 50) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
             }
+
+            chart.update('none');
+            lastChartUpdateSecond = time;
         }
     }
 
     controls.update();
     renderer.render(scene, camera);
 }
-
-
 
 
 document.getElementById("view-results-btn").addEventListener("click", () => {

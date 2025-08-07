@@ -145,17 +145,17 @@ let isAnimating = false;
 let time = 0;
 let animationId = null;
 
-let prevPositionY = null;
-let prevTime = null;
-
 const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const resetBtn = document.getElementById("reset-btn");
+
+let simulationStartTime = null;
 
 startBtn.addEventListener("click", () => {
     isAnimating = true;
     simulationStartTime = performance.now() / 1000;
 });
+
 
 pauseBtn.addEventListener("click", () => {
     isAnimating = false;
@@ -351,10 +351,10 @@ function animate() {
             const k = springConstant;
 
             const timeNow = performance.now() / 1000;
-
+            const elapsedTime = timeNow - simulationStartTime;
             const amplitude = parseFloat(lengthSlider.value);
             const omega = Math.sqrt(k / mass);
-            const x = amplitude * Math.sin(omega * timeNow);
+            const x = amplitude * Math.sin(omega * elapsedTime);
             const currentLength = equilibriumLength + x;
 
             spring.scale.z = currentLength;

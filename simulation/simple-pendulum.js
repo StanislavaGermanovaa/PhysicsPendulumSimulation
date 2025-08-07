@@ -252,14 +252,6 @@ const angleChart = new Chart(chartCtx, {
                 },
                 grid: {
                     color: '#dddddd'
-                },
-                afterDataLimits: (scale) => {
-                    const allValues = scale.chart.data.datasets[0].data.map(Number);
-                    const max = Math.max(...allValues);
-                    const min = Math.min(...allValues);
-                    const buffer = 0.1;
-                    scale.max = Math.ceil((max + buffer) * 10) / 10;
-                    scale.min = Math.floor((min - buffer) * 10) / 10;
                 }
             }
         },

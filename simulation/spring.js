@@ -159,7 +159,7 @@ startBtn.addEventListener("click", () => {
 
         const initialAmplitude = parseFloat(lengthSlider.value);
         chartData.labels.push("0.00");
-        chartData.datasets[0].data.push("0.00");
+        chartData.datasets[0].data.push(initialAmplitude.toFixed(2));
 
         chart.update();
 
@@ -371,8 +371,8 @@ function animate() {
         const amplitude = parseFloat(lengthSlider.value);
 
         const omega = Math.sqrt(k / mass);
-        const x = amplitude * Math.sin(omega * time); 
-        const velocity = amplitude * omega * Math.cos(omega * time);
+        const x = amplitude * Math.cos(omega * time);
+        const velocity = -amplitude * omega * Math.sin(omega * time);
 
         const currentLength = equilibriumLength + x;
 

@@ -352,12 +352,7 @@ function animate() {
 
            const omega = Math.sqrt(g / length);
 
-           if (startFromEquilibrium) {
-                theta = initialAngleRad * Math.sin(omega * time);
-            } else {
-                theta = initialAngleRad * Math.cos(omega * time);
-            }
-
+           theta = initialAngleRad * Math.cos(omega * time);
 
             empty.rotation.x = theta;
 

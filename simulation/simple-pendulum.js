@@ -19,6 +19,15 @@ loader.load('assets/pendulum.glb', (glb) => {
     empty = root.getObjectByName("Pivot_Cylinder");
 }, undefined, () => console.log("An error occurred"));
 
+function setControlsEnabled(enabled) {
+    massSlider.disabled = !enabled;
+    massInput.disabled = !enabled;
+    lengthSlider.disabled = !enabled;
+    lengthInput.disabled = !enabled;
+    angleSlider.disabled = !enabled;
+    angleInput.disabled = !enabled;
+}
+
 function updateSphereSize(value) {
     if (!sphere) return;
     const scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99);
@@ -121,6 +130,7 @@ startBtn.addEventListener("click", () => {
         const initialAngleDeg = parseFloat(angleInput.value);
         const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
+        setControlsEnabled(false);
         if (startFromEquilibrium) {
             theta = 0;
             omegaSim = Math.sqrt(g / parseFloat(lengthInput.value)) * initialAngleRad; 
@@ -143,6 +153,8 @@ pauseBtn.addEventListener("click", () => {
     if (isAnimating) {
         isAnimating = false;
         pauseTime = performance.now() / 1000 - startTime;
+
+        setControlsEnabled(false);
     }
 });
 
@@ -156,14 +168,16 @@ resetBtn.addEventListener("click", () => {
     startTime = null;
     constantTotalEnergy = null;
 
+     setControlsEnabled(true);
+
     lastChartUpdateSecond = -1;
     syncAngleInputs(0);
 
     if (empty) empty.rotation.x = 0;
 
     chartData.labels.length = 0;
-    chartData.datasets[0].data.length = 0;
-    angleChart.update();
+   angleChart.data.datasets[0].data = [];
+angleChart.update();
 
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
@@ -201,14 +215,13 @@ const zeroLinePlugin = {
 const chartCtx = document.getElementById("chart").getContext("2d");
 
 const chartData = {
-    labels: [],
     datasets: [{
         label: 'Хармонично трептене',
         data: [],
         borderColor: 'lightblue',
         borderWidth: 2,
         pointStyle: 'cross',
-        pointRadius: [],
+        pointRadius: 3,
         pointBackgroundColor: 'red',
         fill: false,
         tension: 0.3
@@ -221,38 +234,38 @@ const angleChart = new Chart(chartCtx, {
     options: {
         responsive: true,
         animation: false,
+        parsing: { 
+            xAxisKey: 'x',
+            yAxisKey: 'y'
+        },
         scales: {
             x: {
+                type: 'linear',
+                min: 0,
+                max: 10,
                 title: {
                     display: true,
                     text: 'Време (s)'
                 },
-                 ticks: {
-                    callback: function (value, index, ticks) {
-                        return this.getLabelForValue(value);
-                    }
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value) { return value + ' s'; }
                 },
-                grid: {
-                    color: '#dddddd'
-                }
+                grid: { color: '#dddddd' }
             },
             y: {
                 beginAtZero: false,
-                suggestedMin: -0.5,
-                suggestedMax: 0.5,
+                suggestedMin: -2,  
+                suggestedMax: 2,   
                 title: {
                     display: true,
                     text: 'Амплитуда (м)'
                 },
                 ticks: {
                     stepSize: 0.1,
-                    callback: function (value) {
-                        return `${value.toFixed(2)} м`;
-                    }
+                    callback: function(value) { return value.toFixed(2) + ' м'; }
                 },
-                grid: {
-                    color: '#dddddd'
-                }
+                grid: { color: '#dddddd' }
             }
         },
         plugins: {
@@ -262,10 +275,10 @@ const angleChart = new Chart(chartCtx, {
             },
             tooltip: {
                 callbacks: {
-                    title: function (context) {
-                        return `Време: ${context[0].label} s`;
+                    title: function(context) {
+                        return `Време: ${context[0].parsed.x.toFixed(2)} s`;
                     },
-                    label: function (context) {
+                    label: function(context) {
                         return `Амплитуда: ${context.parsed.y.toFixed(3)} м`;
                     }
                 }
@@ -380,19 +393,8 @@ function animate() {
             const now = performance.now() / 1000;
             time = now - startTime;
 
-            //const displacementCm = length * Math.sin(theta) * 100;
-            const displacementM = length * Math.sin(theta);
-
-            if (time - lastChartUpdateSecond >= 0.1) {
-                chartData.labels.push(time.toFixed(2));
-                //chartData.datasets[0].data.push(displacementCm.toFixed(2));
-                chartData.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
-
-                if (chartData.labels.length > 50) {
-                    chartData.labels.shift();
-                    chartData.datasets[0].data.shift();
-                }
-
+            if (time <= 10 && time - lastChartUpdateSecond >= 0.1) {
+                angleChart.data.datasets[0].data.push({ x: time, y: length * Math.sin(theta) });
                 angleChart.update('none');
                 lastChartUpdateSecond = time;
             }

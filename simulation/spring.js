@@ -36,6 +36,15 @@ loader.load('assets/springPendulum.glb', function(glb) {
     console.log("An error occurred");
 });
 
+function setControlsEnabled(enabled) {
+    massSlider.disabled = !enabled;
+    massInput.disabled = !enabled;
+    lengthSlider.disabled = !enabled;
+    lengthInput.disabled = !enabled;
+    kSlider.disabled = !enabled;
+    kInput.disabled = !enabled;
+}
+
 function updateSphereSize(value) {
     if (sphere) {
         let scaleFactor = 0.2 + (value - 0.01) * (0.5 / 1.99);
@@ -157,21 +166,20 @@ startBtn.addEventListener("click", () => {
         isAnimating = true;
         startTime = performance.now() / 1000 - pauseTime;
 
-        const initialAmplitude = parseFloat(lengthSlider.value);
-        chartData.labels.push("0.00");
-        chartData.datasets[0].data.push(initialAmplitude.toFixed(2));
-
-        chart.update();
-
+        setControlsEnabled(false);
+        
         lastChartUpdateSecond = 0;
     }
 });
+
 
 
 pauseBtn.addEventListener("click", () => {
     if (isAnimating) {
         isAnimating = false;
         pauseTime = time; 
+
+        setControlsEnabled(false);
     }
 });
 resetBtn.addEventListener("click", () => {
@@ -181,6 +189,8 @@ resetBtn.addEventListener("click", () => {
     startTime = null;
     lastChartUpdateSecond = 0; 
 
+    setControlsEnabled(true);
+
     lengthSlider.value = 0;
     lengthInput.value = 0;
 
@@ -189,7 +199,7 @@ resetBtn.addEventListener("click", () => {
     if (sphere) sphere.position.y = -6 * currentLength;
 
     chartData.labels = [];
-    chartData.datasets[0].data = [];
+    chart.data.datasets[0].data = [];
     chart.update();
 
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
@@ -218,14 +228,13 @@ const zeroLinePlugin = {
 
 const chartCtx = document.getElementById("chart").getContext("2d");
 const chartData = {
-    labels: [],
     datasets: [{
         label: "Хармонично трептене (пружина)",
-        data: [],
+        data: [], 
         borderColor: 'lightblue',
         borderWidth: 2,
         pointStyle: 'cross',
-        pointRadius: [],
+        pointRadius: 3,
         pointBackgroundColor: 'red',
         fill: false,
         tension: 0.3
@@ -238,53 +247,44 @@ const chart = new Chart(chartCtx, {
     options: {
         responsive: true,
         animation: false,
+        parsing: { 
+            xAxisKey: 'x',
+            yAxisKey: 'y'
+        },
         scales: {
             x: {
-                title: {
-                    display: true,
-                    text: 'Време (s)'
-                },
+                type: 'linear',            
+                title: { display: true, text: 'Време (s)' },
+                min: 0,                    
+                max: 10,                   
                 ticks: {
-                callback: function (value, index, ticks) {
-                    return this.getLabelForValue(value);
-                }
-            },
-                grid: {
-                    color: '#dddddd'
-                }
+                    stepSize: 1,
+                    callback: function(value) { return value + ' s'; }
+                },
+                grid: { color: '#dddddd' }
             },
             y: {
                 beginAtZero: false,
                 suggestedMin: -0.5,
                 suggestedMax: 0.5,
-                title: {
-                    display: true,
-                    text: 'Отклонение (м)'
-                },
+                title: { display: true, text: 'Отклонение (м)' },
                 ticks: {
                     stepSize: 0.1,
-                    callback: function (value) {
-                        return `${value} м`;
-                    }
+                    callback: function(value) { return `${value} м`; }
                 },
-                grid: {
-                    color: '#dddddd'
-                }
-
+                grid: { color: '#dddddd' }
             }
         },
         plugins: {
-            legend: {
-                display: true,
-                position: 'bottom'
-            },
+            legend: { display: true, position: 'bottom' },
             tooltip: {
                 callbacks: {
-                    title: function (context) {
-                        return `Време: ${context[0].label} s`;
+                    title: function(context) {
+                        
+                        return `Време: ${context[0].parsed.x.toFixed(2)} s`;
                     },
-                    label: function (context) {
-                        return `Отклонение: ${context.parsed.y} м`;
+                    label: function(context) {
+                        return `Отклонение: ${context.parsed.y.toFixed(3)} м`;
                     }
                 }
             }
@@ -395,17 +395,11 @@ function animate() {
         energyChart.update('none');
 
         if (time - lastChartUpdateSecond >= 0.1) {
-            chartData.labels.push(time.toFixed(2));
-            chartData.datasets[0].data.push(x.toFixed(2));
-
-            if (chartData.labels.length > 50) {
-                chartData.labels.shift();
-                chartData.datasets[0].data.shift();
-            }
-
+            chart.data.datasets[0].data.push({ x: time, y: x });
             chart.update('none');
             lastChartUpdateSecond = time;
         }
+
     }
 
     controls.update();

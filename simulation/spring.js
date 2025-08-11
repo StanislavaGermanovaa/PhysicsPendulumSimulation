@@ -247,44 +247,53 @@ const chart = new Chart(chartCtx, {
     options: {
         responsive: true,
         animation: false,
-        parsing: { 
-            xAxisKey: 'x',
-            yAxisKey: 'y'
-        },
         scales: {
             x: {
-                type: 'linear',            
-                title: { display: true, text: 'Време (s)' },
-                min: 0,                    
-                max: 10,                   
-                ticks: {
-                    stepSize: 1,
-                    callback: function(value) { return value + ' s'; }
+                title: {
+                    display: true,
+                    text: 'Време (s)'
                 },
-                grid: { color: '#dddddd' }
+                ticks: {
+                callback: function (value, index, ticks) {
+                    return this.getLabelForValue(value);
+                }
+            },
+                grid: {
+                    color: '#dddddd'
+                }
             },
             y: {
                 beginAtZero: false,
                 suggestedMin: -0.5,
                 suggestedMax: 0.5,
-                title: { display: true, text: 'Отклонение (м)' },
+                title: {
+                    display: true,
+                    text: 'Отклонение (м)'
+                },
                 ticks: {
                     stepSize: 0.1,
-                    callback: function(value) { return `${value} м`; }
+                    callback: function (value) {
+                        return `${value} м`;
+                    }
                 },
-                grid: { color: '#dddddd' }
+                grid: {
+                    color: '#dddddd'
+                }
+
             }
         },
         plugins: {
-            legend: { display: true, position: 'bottom' },
+            legend: {
+                display: true,
+                position: 'bottom'
+            },
             tooltip: {
                 callbacks: {
-                    title: function(context) {
-                        
-                        return `Време: ${context[0].parsed.x.toFixed(2)} s`;
+                    title: function (context) {
+                        return `Време: ${context[0].label} s`;
                     },
-                    label: function(context) {
-                        return `Отклонение: ${context.parsed.y.toFixed(3)} м`;
+                    label: function (context) {
+                        return `Отклонение: ${context.parsed.y} м`;
                     }
                 }
             }
@@ -394,8 +403,15 @@ function animate() {
         ];
         energyChart.update('none');
 
-        if (time - lastChartUpdateSecond >= 0.1) {
-            chart.data.datasets[0].data.push({ x: time, y: x });
+       if (time - lastChartUpdateSecond >= 0.05) {
+            chartData.labels.push(time.toFixed(2));
+            chartData.datasets[0].data.push(x);
+
+            if (chartData.labels.length > 50) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+            }
+
             chart.update('none');
             lastChartUpdateSecond = time;
         }

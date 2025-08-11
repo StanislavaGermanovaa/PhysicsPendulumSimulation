@@ -234,39 +234,38 @@ const angleChart = new Chart(chartCtx, {
     options: {
         responsive: true,
         animation: false,
-        parsing: { 
-            xAxisKey: 'x',
-            yAxisKey: 'y'
-        },
         scales: {
             x: {
-                type: 'linear',
-                min: 0,
-                max: 10,
                 title: {
                     display: true,
                     text: 'Време (s)'
                 },
-                ticks: {
-                    stepSize: 1,
-                    callback: function(value) { return value + ' s'; }
+                 ticks: {
+                    callback: function (value, index, ticks) {
+                        return this.getLabelForValue(value);
+                    }
                 },
-                grid: { color: '#dddddd' }
+                grid: {
+                    color: '#dddddd'
+                }
             },
-            y: {
-                beginAtZero: false,
-                suggestedMin: -2,  
-                suggestedMax: 2,   
-                title: {
-                    display: true,
-                    text: 'Амплитуда (м)'
-                },
-                ticks: {
-                    stepSize: 0.1,
-                    callback: function(value) { return value.toFixed(2) + ' м'; }
-                },
-                grid: { color: '#dddddd' }
+           y: {
+            min: -2.5,
+            max: 2.5,
+            title: {
+                display: true,
+                text: 'Амплитуда (м)'
+            },
+            ticks: {
+                stepSize: 0.5,
+                callback: function (value) {
+                    return `${value.toFixed(2)} м`;
+                }
+            },
+            grid: {
+                color: '#dddddd'
             }
+        }
         },
         plugins: {
             legend: {
@@ -275,10 +274,10 @@ const angleChart = new Chart(chartCtx, {
             },
             tooltip: {
                 callbacks: {
-                    title: function(context) {
-                        return `Време: ${context[0].parsed.x.toFixed(2)} s`;
+                    title: function (context) {
+                        return `Време: ${context[0].label} s`;
                     },
-                    label: function(context) {
+                    label: function (context) {
                         return `Амплитуда: ${context.parsed.y.toFixed(3)} м`;
                     }
                 }
@@ -393,8 +392,19 @@ function animate() {
             const now = performance.now() / 1000;
             time = now - startTime;
 
-            if (time <= 10 && time - lastChartUpdateSecond >= 0.1) {
-                angleChart.data.datasets[0].data.push({ x: time, y: length * Math.sin(theta) });
+            //const displacementCm = length * Math.sin(theta) * 100;
+            const displacementM = length * Math.sin(theta);
+
+            if (time - lastChartUpdateSecond >= 0.1) {
+                chartData.labels.push(time.toFixed(2));
+                //chartData.datasets[0].data.push(displacementCm.toFixed(2));
+                chartData.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
+
+                if (chartData.labels.length > 50) {
+                    chartData.labels.shift();
+                    chartData.datasets[0].data.shift();
+                }
+
                 angleChart.update('none');
                 lastChartUpdateSecond = time;
             }

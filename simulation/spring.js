@@ -167,11 +167,41 @@ startBtn.addEventListener("click", () => {
         startTime = performance.now() / 1000 - pauseTime;
 
         setControlsEnabled(false);
-        
-        lastChartUpdateSecond = 0;
+
+        if (pauseTime === 0) {
+            chartTimeOffset = 0;
+            fillInitialChartData();
+            lastChartUpdateSecond = chartTimeOffset;
+        } else {
+            lastChartUpdateSecond = parseFloat(chartData.labels[chartData.labels.length - 1]) || 0;
+        }
     }
 });
 
+let chartTimeOffset = 0; 
+
+function fillInitialChartData() {
+    const mass = parseFloat(massSlider.value);
+    const k = springConstant;
+    const amplitude = parseFloat(lengthSlider.value);
+    const omega = Math.sqrt(k / mass);
+
+    if (chartTimeOffset === 0) {
+        chartData.labels = [];
+        chartData.datasets[0].data = [];
+    }
+
+    for (let i = 0; i < 50; i++) {
+        const t = chartTimeOffset + i * 0.1;
+        const x = amplitude * Math.cos(omega * t);
+        chartData.labels.push(t.toFixed(2));
+        chartData.datasets[0].data.push(parseFloat(x.toFixed(3)));
+    }
+
+    chartTimeOffset = parseFloat(chartData.labels[chartData.labels.length - 1]) + 0.1;
+    lastChartUpdateSecond = chartTimeOffset;
+    chart.update('none');
+}
 
 
 pauseBtn.addEventListener("click", () => {
@@ -380,8 +410,9 @@ function animate() {
         const amplitude = parseFloat(lengthSlider.value);
 
         const omega = Math.sqrt(k / mass);
-        const x = amplitude * Math.cos(omega * time);
-        const velocity = -amplitude * omega * Math.sin(omega * time);
+        const chartTime = time + chartTimeOffset; // Use chartTime for chart updates
+        const x = amplitude * Math.cos(omega * chartTime);
+        const velocity = -amplitude * omega * Math.sin(omega * chartTime);
 
         const currentLength = equilibriumLength + x;
 
@@ -403,9 +434,9 @@ function animate() {
         ];
         energyChart.update('none');
 
-       if (time - lastChartUpdateSecond >= 0.05) {
-            chartData.labels.push(time.toFixed(2));
-            chartData.datasets[0].data.push(x);
+        if (chartTime - lastChartUpdateSecond >= 0.1) {
+            chartData.labels.push(chartTime.toFixed(2));
+            chartData.datasets[0].data.push(parseFloat(x.toFixed(3)));
 
             if (chartData.labels.length > 50) {
                 chartData.labels.shift();
@@ -413,9 +444,8 @@ function animate() {
             }
 
             chart.update('none');
-            lastChartUpdateSecond = time;
+            lastChartUpdateSecond = chartTime;
         }
-
     }
 
     controls.update();

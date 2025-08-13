@@ -116,14 +116,19 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = false;
 
+
 let isAnimating = false;
 let time = 0, pauseTime = 0, startTime = null;
 let theta = 0, omegaSim = 0;
 const g = 9.81, dt = 1 / 60;
 let startFromEquilibrium = true;
 let constantTotalEnergy = null;
+let chartTimeOffset = 0;
 
 const startBtn = document.getElementById("start-btn");
+let lastPauseTime = 0;
+
+
 startBtn.addEventListener("click", () => {
     if (!isAnimating) {
         isAnimating = true;
@@ -138,22 +143,55 @@ startBtn.addEventListener("click", () => {
             const mass = parseFloat(massInput.value);
             const height0 = length * (1 - Math.cos(initialAngleRad));
             constantTotalEnergy = mass * g * height0;
-
         } else {
             theta = initialAngleRad;
             omegaSim = 0;
         }
-
-        startTime = performance.now() / 1000 - pauseTime;
+        if (startTime === null) {
+            startTime = performance.now() / 1000;
+            chartTimeOffset = 0;
+            fillInitialChartData();
+            lastChartUpdateSecond = chartTimeOffset;
+        } else {
+            startTime = performance.now() / 1000 - pauseTime;
+            lastChartUpdateSecond = parseFloat(chartData.labels[chartData.labels.length - 1]) || 0;
+        }
     }
 });
+
+
+function fillInitialChartData() {
+    const length = parseFloat(lengthInput.value);
+    const initialAngleDeg = parseFloat(angleInput.value);
+    const initialAngleRad = initialAngleDeg * Math.PI / 180;
+    const omega = Math.sqrt(g / length);
+
+    if (chartTimeOffset === 0) {
+        chartData.labels = [];
+        chartData.datasets[0].data = [];
+    }
+
+    for (let i = 0; i < 50; i++) {
+        const t = chartTimeOffset + i * 0.1;
+        const theta_t = initialAngleRad * Math.cos(omega * t);
+        const displacementM = length * Math.sin(theta_t);
+        chartData.labels.push(t.toFixed(2));
+        chartData.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
+    }
+
+    chartTimeOffset = parseFloat(chartData.labels[chartData.labels.length - 1]) + 0.1;
+    lastChartUpdateSecond = chartTimeOffset;
+    angleChart.update();
+}
+
+
 
 const pauseBtn = document.getElementById("pause-btn");
 pauseBtn.addEventListener("click", () => {
     if (isAnimating) {
         isAnimating = false;
         pauseTime = performance.now() / 1000 - startTime;
-
+        lastPauseTime = pauseTime; 
         setControlsEnabled(false);
     }
 });
@@ -163,12 +201,13 @@ resetBtn.addEventListener("click", () => {
     isAnimating = false;
     time = 0;
     pauseTime = 0;
+    lastPauseTime = 0;
     theta = 0;
     omegaSim = 0;
     startTime = null;
     constantTotalEnergy = null;
 
-     setControlsEnabled(true);
+    setControlsEnabled(true);
 
     lastChartUpdateSecond = -1;
     syncAngleInputs(0);
@@ -176,8 +215,8 @@ resetBtn.addEventListener("click", () => {
     if (empty) empty.rotation.x = 0;
 
     chartData.labels.length = 0;
-   angleChart.data.datasets[0].data = [];
-angleChart.update();
+    angleChart.data.datasets[0].data = [];
+    angleChart.update();
 
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
@@ -348,7 +387,6 @@ const energyChart = new Chart(energyChartCtx, {
     }
 });
 
-
 let lastChartUpdateSecond = -1;
 
 
@@ -362,15 +400,18 @@ function animate() {
             const initialAngleDeg = parseFloat(angleInput.value); 
             const initialAngleRad = initialAngleDeg * Math.PI / 180;
 
-           const omega = Math.sqrt(g / length);
+            const omega = Math.sqrt(g / length);
 
-           theta = initialAngleRad * Math.cos(omega * time);
+            const now = performance.now() / 1000;
+            time = now - startTime;
+            const chartTime = time + chartTimeOffset; 
 
+            theta = initialAngleRad * Math.cos(omega * chartTime);
             empty.rotation.x = theta;
 
             const height = length * (1 - Math.cos(theta));
             const potentialEnergy = mass * g * height;
-            const totalEnergy = constantTotalEnergy !== null ? constantTotalEnergy : potentialEnergy + kineticEnergy;
+            const totalEnergy = constantTotalEnergy !== null ? constantTotalEnergy : potentialEnergy;
             const kineticEnergy = Math.max(0, totalEnergy - potentialEnergy);
 
             const potEl = document.getElementById("potential-energy");
@@ -389,15 +430,9 @@ function animate() {
             energyChart.data.datasets[0].data[3] = period;
             energyChart.update('none');
 
-            const now = performance.now() / 1000;
-            time = now - startTime;
-
-            //const displacementCm = length * Math.sin(theta) * 100;
-            const displacementM = length * Math.sin(theta);
-
-            if (time - lastChartUpdateSecond >= 0.1) {
-                chartData.labels.push(time.toFixed(2));
-                //chartData.datasets[0].data.push(displacementCm.toFixed(2));
+            if (chartTime - lastChartUpdateSecond >= 0.1) {
+                const displacementM = length * Math.sin(theta);
+                chartData.labels.push(chartTime.toFixed(2));
                 chartData.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
 
                 if (chartData.labels.length > 50) {
@@ -406,7 +441,7 @@ function animate() {
                 }
 
                 angleChart.update('none');
-                lastChartUpdateSecond = time;
+                lastChartUpdateSecond = chartTime;
             }
         }
     }

@@ -52,7 +52,7 @@ const g = 9.81;
 let startFromEquilibrium = true;
 let constantTotalEnergy = null;
 let chartTimeOffset = 0;
-let lastChartUpdateSecond = -1;
+let lastChartUpdateSecond = -0.1;
 
 const startBtn = document.getElementById("start-btn");
 startBtn.addEventListener("click", () => {
@@ -74,11 +74,10 @@ startBtn.addEventListener("click", () => {
         if (startTime === null) {
             startTime = performance.now() / 1000;
             chartTimeOffset = 0;
-            fillInitialChartData();
-            lastChartUpdateSecond = chartTimeOffset;
+            lastChartUpdateSecond = -0.1;
         } else {
             startTime = performance.now() / 1000 - pauseTime;
-            lastChartUpdateSecond = parseFloat(angleChart.data.labels[angleChart.data.labels.length - 1]) || 0;
+            lastChartUpdateSecond = angleChart.data.datasets[0].data.length > 0 ? angleChart.data.datasets[0].data[angleChart.data.datasets[0].data.length - 1].x : -0.1;
         }
     }
 });
@@ -106,8 +105,9 @@ resetBtn.addEventListener("click", () => {
     syncAngleInputs(0);
     if (empty) empty.rotation.x = 0;
 
-    angleChart.data.labels.length = 0;
     angleChart.data.datasets[0].data = [];
+    angleChart.options.scales.x.min = 0;
+    angleChart.options.scales.x.max = 5;
     angleChart.update();
 
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
@@ -120,30 +120,6 @@ resetBtn.addEventListener("click", () => {
 
     updatePeriodDisplay();
 });
-
-function fillInitialChartData() {
-    const length = parseFloat(lengthInput.value);
-    const initialAngleDeg = parseFloat(angleInput.value);
-    const initialAngleRad = initialAngleDeg * Math.PI / 180;
-    const omega = Math.sqrt(g / length);
-
-    if (chartTimeOffset === 0) {
-        angleChart.data.labels = [];
-        angleChart.data.datasets[0].data = [];
-    }
-
-    for (let i = 0; i < 50; i++) {
-        const t = chartTimeOffset + i * 0.1;
-        const theta_t = initialAngleRad * Math.cos(omega * t);
-        const displacementM = length * Math.sin(theta_t);
-        angleChart.data.labels.push(t.toFixed(2));
-        angleChart.data.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
-    }
-
-    chartTimeOffset = parseFloat(angleChart.data.labels[angleChart.data.labels.length - 1]) + 0.1;
-    lastChartUpdateSecond = chartTimeOffset;
-    angleChart.update();
-}
 
 function updatePeriodDisplay() {
     const length = parseFloat(lengthInput.value);
@@ -198,12 +174,17 @@ function animate() {
 
         if (chartTime - lastChartUpdateSecond >= 0.1) {
             const displacementM = length * Math.sin(theta);
-            angleChart.data.labels.push(chartTime.toFixed(2));
-            angleChart.data.datasets[0].data.push(parseFloat(displacementM.toFixed(3)));
+            const data = angleChart.data.datasets[0].data;
+            data.push({ x: chartTime, y: parseFloat(displacementM.toFixed(3)) });
 
-            if (angleChart.data.labels.length > 50) {
-                angleChart.data.labels.shift();
-                angleChart.data.datasets[0].data.shift();
+            const windowSize = 5;
+            if (chartTime > windowSize) {
+                angleChart.options.scales.x.min = chartTime - windowSize;
+                angleChart.options.scales.x.max = chartTime;
+            }
+
+            while (data.length > 0 && data[0].x < angleChart.options.scales.x.min - 1) {
+                data.shift();
             }
 
             angleChart.update('none');
@@ -219,9 +200,10 @@ document.getElementById("view-results-btn").addEventListener("click", () => {
     const length = parseFloat(lengthInput.value);
     const period = 2 * Math.PI * Math.sqrt(length / g);
 
+    const chartData = angleChart.data.datasets[0].data;
     const data = {
-        timeLabels: angleChart.data.labels,
-        angleValues: angleChart.data.datasets[0].data,
+        timeLabels: chartData.map(d => d.x.toFixed(2)),
+        angleValues: chartData.map(d => d.y),
         mass: parseFloat(massInput.value),
         length: length,
         period: period,

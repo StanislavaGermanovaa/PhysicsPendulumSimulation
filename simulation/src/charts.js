@@ -42,17 +42,26 @@ function createOscillationChart(ctx, chartLabel, yTitle, yMin, yMax, yStep, yTic
       animation: false,
       scales: {
         x: {
+          type: 'linear',
+          position: 'bottom',
+          min: 0,
+          max: 5,
           title: {
             display: true,
             text: 'Време (s)'
           },
           ticks: {
-            callback: function (value, index, ticks) {
-              return this.getLabelForValue(value);
+            stepSize: 0.1, // Деления на всеки 0.1 секунди за повече чертички
+            callback: function(value) {
+              return value.toFixed(1); // Показва времето с 1 знак след десетичната запетая
             }
           },
           grid: {
-            color: '#dddddd'
+            display: true, // Показва мрежата за "квадратчета"
+            drawBorder: true,
+            drawOnChartArea: true,
+            lineWidth: 1,
+            color: 'rgba(0, 0, 0, 0.1)' // Лека мрежа, видима на светъл/тъмен фон
           }
         },
         y: {

@@ -25,7 +25,10 @@ function updateSphereSize(value) {
     }
 }
 
-const { slider: massSlider, input: massInput } = setupControlListeners("mass-slider", "mass-input", updateSphereSize);
+const { slider: massSlider, input: massInput } = setupControlListeners("mass-slider", "mass-input", (value) => {
+    updateSphereSize(value);
+    updatePeriodDisplay();
+});
 
 const equilibriumLength = 0.4;
 
@@ -43,6 +46,7 @@ let springConstant = parseFloat(document.getElementById("k-slider")?.value || 10
 
 const { slider: kSlider, input: kInput } = setupControlListeners("k-slider", "k-input", (value) => {
     springConstant = value;
+    updatePeriodDisplay();
 });
 
 let isAnimating = false;
@@ -50,7 +54,7 @@ let time = 0;
 let pauseTime = 0;
 let startTime = null;
 let chartTimeOffset = 0;
-let lastChartUpdateSecond = 0;
+let lastChartUpdateSecond = -0.1;
 
 const startBtn = document.getElementById("start-btn");
 startBtn.addEventListener("click", () => {
@@ -62,10 +66,9 @@ startBtn.addEventListener("click", () => {
 
         if (pauseTime === 0) {
             chartTimeOffset = 0;
-            fillInitialChartData();
-            lastChartUpdateSecond = chartTimeOffset;
+            lastChartUpdateSecond = -0.1;
         } else {
-            lastChartUpdateSecond = parseFloat(chart.data.labels[chart.data.labels.length - 1]) || 0;
+            lastChartUpdateSecond = chart.data.datasets[0].data.length > 0 ? chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1].x : -0.1;
         }
     }
 });
@@ -85,7 +88,7 @@ resetBtn.addEventListener("click", () => {
     time = 0;
     pauseTime = 0;
     startTime = null;
-    lastChartUpdateSecond = 0;
+    lastChartUpdateSecond = -0.1;
 
     setControlsEnabled(["mass-slider", "amplitude-slider", "k-slider"], true);
 
@@ -95,37 +98,22 @@ resetBtn.addEventListener("click", () => {
     if (spring) spring.scale.z = currentLength;
     if (sphere) sphere.position.y = -6 * currentLength;
 
-    chart.data.labels = [];
     chart.data.datasets[0].data = [];
+    chart.options.scales.x.min = 0;
+    chart.options.scales.x.max = 5;
     chart.update();
 
     energyChart.data.datasets[0].data = [0, 0, 0, 0];
     energyChart.update();
 
-    document.getElementById("period-value").textContent = "0.00";
+    updatePeriodDisplay();
 });
 
-function fillInitialChartData() {
-    const mass = parseFloat(massSlider.value);
+function updatePeriodDisplay() {
+    const mass = parseFloat(massInput.value);
     const k = springConstant;
-    const amplitude = parseFloat(lengthSlider.value);
-    const omega = Math.sqrt(k / mass);
-
-    if (chartTimeOffset === 0) {
-        chart.data.labels = [];
-        chart.data.datasets[0].data = [];
-    }
-
-    for (let i = 0; i < 50; i++) {
-        const t = chartTimeOffset + i * 0.1;
-        const x = amplitude * Math.cos(omega * t);
-        chart.data.labels.push(t.toFixed(2));
-        chart.data.datasets[0].data.push(parseFloat(x.toFixed(3)));
-    }
-
-    chartTimeOffset = parseFloat(chart.data.labels[chart.data.labels.length - 1]) + 0.1;
-    lastChartUpdateSecond = chartTimeOffset;
-    chart.update('none');
+    const period = (k > 0 && mass > 0) ? (2 * Math.PI * Math.sqrt(mass / k)).toFixed(2) : "0.00";
+    document.getElementById("period-value").textContent = period;
 }
 
 const chartCtx = document.getElementById("chart").getContext("2d");
@@ -162,7 +150,6 @@ function animate() {
         const totalEnergy = potentialEnergy + kineticEnergy;
 
         const period = 2 * Math.PI * Math.sqrt(mass / k);
-        document.getElementById("period-value").textContent = period.toFixed(2);
 
         energyChart.data.datasets[0].data = [
             potentialEnergy,
@@ -173,12 +160,17 @@ function animate() {
         energyChart.update('none');
 
         if (chartTime - lastChartUpdateSecond >= 0.1) {
-            chart.data.labels.push(chartTime.toFixed(2));
-            chart.data.datasets[0].data.push(parseFloat(x.toFixed(3)));
+            const data = chart.data.datasets[0].data;
+            data.push({ x: chartTime, y: parseFloat(x.toFixed(3)) });
 
-            if (chart.data.labels.length > 50) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
+            const windowSize = 5;
+            if (chartTime > windowSize) {
+                chart.options.scales.x.min = chartTime - windowSize;
+                chart.options.scales.x.max = chartTime;
+            }
+
+            while (data.length > 0 && data[0].x < chart.options.scales.x.min - 1) {
+                data.shift();
             }
 
             chart.update('none');
@@ -196,9 +188,10 @@ document.getElementById("view-results-btn").addEventListener("click", () => {
     const k = parseFloat(kInput.value);
     const period = 2 * Math.PI * Math.sqrt(mass / k);
 
+    const chartData = chart.data.datasets[0].data;
     const data = {
-        timeLabels: chart.data.labels,
-        displacementValues: chart.data.datasets[0].data,
+        timeLabels: chartData.map(d => d.x.toFixed(2)),
+        displacementValues: chartData.map(d => d.y),
         mass: mass,
         amplitude: amplitude,
         springConstant: k,
@@ -209,4 +202,5 @@ document.getElementById("view-results-btn").addEventListener("click", () => {
     window.open('results/spring-pendulum-results.html', '_blank');
 });
 
+updatePeriodDisplay();
 animate();

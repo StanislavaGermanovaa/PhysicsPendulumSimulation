@@ -24,7 +24,6 @@
                 <option value="7">7. клас</option>
                 <option value="9">9. клас</option>
             </select>
-
         </div>
 
         <div class="navbar-center">
@@ -87,7 +86,6 @@
                             <button id="reset-btn">Нулиране</button>
                         </div>
                         <button id="view-results-btn" class="grade-9-only">Резултати</button>
-                        <!-- <button id="spring-btn" onclick="location.href='spring-pendulum.html'">Пружинно махало</button> -->
                     </div>
                 </div>
             </div>
@@ -141,12 +139,12 @@
                 <canvas id="energyChart" width="300" height="380" class="grade-9-only" ></canvas>
             </div>
         </div>
+    </div>
     <script type="module" src="src/simple-pendulum.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initGradeUI } from './src/grade-ui.js';
         initGradeUI();
     </script>
-
 </body>
 </html>
